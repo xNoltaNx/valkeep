@@ -1,0 +1,32 @@
+{
+  "panelPort": 8080,
+  "serverExe": "",
+  "installDir": "",
+  "saveDir": "",
+  "server": {
+    "name": "My Valheim Server",
+    "world": "Dedicated",
+    "password": "",
+    "port": 2456,
+    "public": false,
+    "crossplay": true,
+    "saveinterval": 1800,
+    "backups": 4,
+    "backupshort": 7200,
+    "backuplong": 43200,
+    "preset": "",
+    "modifiers": {},
+    "setkeys": []
+  },
+  "backupIntervalMinutes": 30,
+  "backupRetention": 24,
+  "logPatterns": {
+    "handshake": "Got handshake from client (?<id>\\d+)",
+    "connected": "Got connection SteamID (?<id>\\d+)",
+    "disconnected": "Closing socket (?<id>\\d+)",
+    "character": "Got character ZDOID from (?<name>.+?) : (?<zdo>-?\\d+):(?<rev>\\d+)",
+    "worldSaved": "World saved *\\( *(?<ms>[\\d.]+)ms *\\)",
+    "joinCode": "Session \"(?<session>.*?)\" registered with join code (?<code>\\d+)",
+    "heartbeat": "is active with (?<players>\\d+) player"
+  }
+}
