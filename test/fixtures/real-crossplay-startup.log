@@ -1,0 +1,197 @@
+Mono path[0] = 'E:/ai-projects/valheim-server/server/valheim_server_Data/Managed'
+Mono config path = 'E:/ai-projects/valheim-server/server/MonoBleedingEdge/etc'
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Initialize engine version: 6000.0.61f1 (74a0adb02c31)
+[Subsystems] Discovering subsystems at path E:/ai-projects/valheim-server/server/valheim_server_Data/UnitySubsystems
+Forcing GfxDevice: Null
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+NullGfxDevice:
+    Version:  NULL 1.0 [1.0]
+    Renderer: Null Device
+    Vendor:   Unity Technologies
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.067 seconds
+- Finished resetting the current domain, in  0.001 seconds
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Microsoft Media Foundation video decoding to texture disabled: graphics device is Null, only Direct3D 11 and Direct3D 12 (only on desktop) are supported for hardware-accelerated video decoding.
+UnloadTime: 0.180200 ms
+09/07/2026 13:40:16: Set background loading budget to Low
+09/07/2026 13:40:16: Loading first scene!
+09/07/2026 13:40:16: Preferences initialized! Activating first scene!
+Unloading 4 Unused Serialized files (Serialized files now loaded: 8)
+UnloadTime: 0.031400 ms
+09/07/2026 13:40:16: Can't return the graphics config when it's not loaded!
+09/07/2026 13:40:16: 
+09/07/2026 13:40:16: Starting to load scene:start.unity (169d7618616154c03be07e9ad3af5893)
+09/07/2026 13:40:16: Set background loading budget to Normal
+09/07/2026 13:40:16: Loaded localization file #0 - 'localization' language: 'English'
+09/07/2026 13:40:16: Loaded localization file #1 - 'localization_extra' language: 'English'
+09/07/2026 13:40:16: Loaded localization file #2 - 'heightmap_message' language: 'English'
+09/07/2026 13:40:16: Loaded localization file #3 - 'localization_witch' language: 'English'
+09/07/2026 13:40:16: Loaded localization file #4 - 'localization_ashlands' language: 'English'
+09/07/2026 13:40:16: Loaded localization file #5 - 'localization_captions' language: 'English'
+09/07/2026 13:40:16: Loaded localization file #6 - 'localization_combatupdate' language: 'English'
+09/07/2026 13:40:16: Loaded localization file #7 - 'localization_celebrationupdate' language: 'English'
+Unloading 170 unused Assets to reduce memory usage. Loaded Objects now: 2416.
+Total: 1.564700 ms (FindLiveObjects: 0.094700 ms CreateObjectMapping: 0.023600 ms MarkObjects: 1.350400 ms  DeleteObjects: 0.095800 ms)
+
+The referenced script on this Behaviour (Game Object '<null>') is missing!
+Unloading 2 Unused Serialized files (Serialized files now loaded: 17)
+09/07/2026 13:40:20: Set background loading budget to High
+09/07/2026 13:40:20: GPU Device: 0000:0000 (Unknown)
+09/07/2026 13:40:20: Set background loading budget to Low
+UnloadTime: 5.494700 ms
+HDR Render Texture not supported, disabling HDR on reflection probe.
+09/07/2026 13:40:20: Missing audio clip in music respawn
+OnGUI function detected on MonoBehaviour, but not called, because IMGUI module is stripped.
+09/07/2026 13:40:20: Setting -logfile to: E:\ai-projects\valheim-server\data\logs\probe3.log
+09/07/2026 13:40:20: Get create world ProbeWorld
+09/07/2026 13:40:20: Using steam_appid.txt
+09/07/2026 13:40:20: Using steam APPID:892970
+Setting breakpad minidump AppID = 892970
+SteamInternal_SetMinidumpSteamID:  Caching Steam ID:  76561197960265728 [API loaded no]
+09/07/2026 13:40:20: Server ID 90071992547409920
+09/07/2026 13:40:20: Authentication:k_ESteamNetworkingAvailability_Waiting
+09/07/2026 13:40:20: Steam game server initialized
+09/07/2026 13:40:20: Valheim version: 0.221.12 (network version 36)
+09/07/2026 13:40:21: Worldgenerator version setup:2
+09/07/2026 13:40:21: Console: Valheim 0.221.12 (network version 36)
+09/07/2026 13:40:21: Console: 
+09/07/2026 13:40:21: Console: type "help" - for commands
+09/07/2026 13:40:21: Console: 
+09/07/2026 13:40:21: Render threading mode:SingleThreaded
+OnGUI function detected on MonoBehaviour, but not called, because IMGUI module is stripped.
+09/07/2026 13:40:21: Builder started
+09/07/2026 13:40:21: Sending PlayFab login request (attempt 1)
+09/07/2026 13:40:21: Login postponed until ID has been set.
+The shader Hidden/Dof/DepthOfFieldHdr (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.DepthOfField) is not supported on this platform!
+The image effect Main Camera (UnityStandardAssets.ImageEffects.DepthOfField) has been disabled as it's not supported on the current platform.
+The shader Hidden/SunShaftsComposite (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) is not supported on this platform!
+The shader Hidden/SimpleClear (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) is not supported on this platform!
+The image effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) has been disabled as it's not supported on the current platform.
+09/07/2026 13:40:21: Starting music menu
+Unloading 93784 unused Assets to reduce memory usage. Loaded Objects now: 207152.
+Total: 95.497400 ms (FindLiveObjects: 16.136900 ms CreateObjectMapping: 15.548200 ms MarkObjects: 43.635800 ms  DeleteObjects: 20.176200 ms)
+
+The referenced script on this Behaviour (Game Object '<null>') is missing!
+The referenced script on this Behaviour (Game Object '<null>') is missing!
+Unloading 3 Unused Serialized files (Serialized files now loaded: 18)
+UnloadTime: 7.420200 ms
+HDR Render Texture not supported, disabling HDR on reflection probe.
+HDR Render Texture not supported, disabling HDR on reflection probe.
+09/07/2026 13:40:21: Audioman already exist, destroying self
+OnGUI function detected on MonoBehaviour, but not called, because IMGUI module is stripped.
+src\clientdll\cminterface.cpp (2253) : !BLoggedOn()
+src\clientdll\cminterface.cpp (2253) : !BLoggedOn()
+09/07/2026 13:40:21: Console: Valheim 0.221.12 (network version 36)
+09/07/2026 13:40:21: Console: 
+09/07/2026 13:40:21: Console: type "help" - for commands
+09/07/2026 13:40:21: Console: 
+09/07/2026 13:40:21: isModded: False
+09/07/2026 13:40:21: Zonesystem Awake 26473
+09/07/2026 13:40:21: DungeonDB Awake 26473
+09/07/2026 13:40:21: Worldgenerator version setup:2
+OnGUI function detected on MonoBehaviour, but not called, because IMGUI module is stripped.
+ArgumentNullException: Value cannot be null.
+Parameter name: shader
+  at UnityEngine.Bindings.ThrowHelper.ThrowArgumentNullException (System.Object obj, System.String parameterName) [0x00018] in <89f741081c874c65b780dbd6a0d8d33e>:0 
+  at UnityEngine.Material.CreateWithShader (UnityEngine.Material self, UnityEngine.Shader shader) [0x00003] in <89f741081c874c65b780dbd6a0d8d33e>:0 
+  at UnityEngine.Material..ctor (UnityEngine.Shader shader) [0x00008] in <89f741081c874c65b780dbd6a0d8d33e>:0 
+  at ShieldDomeImageEffect.Awake () [0x0000b] in <c366779df99d449da9e16b4e0a4d1800>:0 
+
+09/07/2026 13:40:23: Console: /w [text] - Whisper
+09/07/2026 13:40:23: Console: /s [text] - Shout
+09/07/2026 13:40:23: Console: /die - Kill yourself
+09/07/2026 13:40:23: Console: /resetspawn - Reset spawn point
+09/07/2026 13:40:23: Console: /[emote]
+09/07/2026 13:40:23: Console: Emotes: wave, sit, challenge, cheer, nonono, thumbsup, point, blowkiss, bow, cower, cry, despair, flex, comehere, headbang, kneel, laugh, roar, shrug, dance, relax, toast, rest, vibe, loveyou
+09/07/2026 13:40:23: Console: 
+Unloading 377 unused Assets to reduce memory usage. Loaded Objects now: 206062.
+Total: 67.512900 ms (FindLiveObjects: 7.737200 ms CreateObjectMapping: 10.033300 ms MarkObjects: 49.404500 ms  DeleteObjects: 0.337500 ms)
+
+09/07/2026 13:40:23: Zonesystem Start 26473
+09/07/2026 13:40:23: Added 3 locations, 0 vegetations, 0 environments, 0 biome env-setups, 0 clutter  from main
+09/07/2026 13:40:23: Added 1 locations, 0 vegetations, 2 environments, 0 biome env-setups, 0 clutter  from main
+09/07/2026 13:40:23: Added 27 locations, 25 vegetations, 5 environments, 1 biome env-setups, 3 clutter  from main
+09/07/2026 13:40:23: Added 4 locations, 0 vegetations, 1 environments, 0 biome env-setups, 0 clutter  from main
+09/07/2026 13:40:23: Added 25 locations, 33 vegetations, 8 environments, 2 biome env-setups, 2 clutter  from main
+09/07/2026 13:40:23: DungeonDB Start 26473
+09/07/2026 13:40:23: ZRpc timeout set to 30s 
+09/07/2026 13:40:23: ZNET START
+09/07/2026 13:40:23: Load world: ProbeWorld (ProbeWorld)
+09/07/2026 13:40:23: Loading 81 zdos, my sessionID: -1686068743, data version: 37
+09/07/2026 13:40:23: Loading in ZDOs
+09/07/2026 13:40:23: Adding to Dictionary
+09/07/2026 13:40:23: Adding to Sectors
+09/07/2026 13:40:23: Connecting Portals, Spawners & ZSyncTransforms
+09/07/2026 13:40:23: Loaded 11361 locations
+09/07/2026 13:40:23: Unloading unused assets
+Unloading 0 Unused Serialized files (Serialized files now loaded: 18)
+09/07/2026 13:40:23: PlayFab custom ID set to "PlayFab_ProbeTest_2456_9ebd1dba6fa5d8a3ad84825e44a0d45d3e9893c3"
+09/07/2026 13:40:23: Sending PlayFab login request (attempt 2)
+09/07/2026 13:40:23: Semaphore type: SemaphoreSlim
+09/07/2026 13:40:23: Opened PlayFab server
+The shader Hidden/Dof/DepthOfFieldHdr (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.DepthOfField) is not supported on this platform!
+The image effect Main Camera (UnityStandardAssets.ImageEffects.DepthOfField) has been disabled as it's not supported on the current platform.
+The shader Hidden/SunShaftsComposite (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) is not supported on this platform!
+The shader Hidden/SimpleClear (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) is not supported on this platform!
+The image effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) has been disabled as it's not supported on the current platform.
+09/07/2026 13:40:24: Game server connected
+Unloading 2 unused Assets to reduce memory usage. Loaded Objects now: 206051.
+Total: 75.136000 ms (FindLiveObjects: 9.766800 ms CreateObjectMapping: 13.549600 ms MarkObjects: 51.700100 ms  DeleteObjects: 0.119100 ms)
+
+09/07/2026 13:40:24: Logged in PlayFab user via custom ID
+09/07/2026 13:40:24: PlayFab logged in as "PlayFab_ProbeTest_2456_9ebd1dba6fa5d8a3ad84825e44a0d45d3e9893c3"
+09/07/2026 13:40:24: PlayFab local entity ID is BD576DBD477ED076
+IPv4, returning 203.0.113.10:2456
+09/07/2026 13:40:24: New session server "ProbeTest" that has join code , now 0 player(s)
+09/07/2026 13:40:24: Register PlayFab server "ProbeTest" with IP 203.0.113.10:2456
+09/07/2026 13:40:24: Server 'ProbeTest' begin PlayFab create and join network for server 
+09/07/2026 13:40:25: Joined PlayFab Party network with ID "0bfdfab8-eb0a-4cfc-b94d-cd33dc6cf29a|AwBBOQufQg+8o5YTh0e8JEK3rXipA1dlc3RVcwAAAAAAAAAAAAAAAAAAQHZhtFmwm2+5xoip1gMQZO0ZPAJr9HsbOYa1hNGP3Va8FUtkbnMtaXIwLTgxZTUtNzU1MWEwN2ItODIxZC00MjI3LTgyYTgtNDZlNzQxNDgxOTFjLndlc3R1cy5jbG91ZGFwcC5henVyZS5jb20="
+This is the serverIP used to register the server: 203.0.113.10:2456
+09/07/2026 13:40:25: Created PlayFab lobby with ID "be1b2a59-c5df-4a16-b24a-0ceec02b3805.r-20260323", ConnectionString "cv2:be1b2a59-c5df-4a16-b24a-0ceec02b3805.r-20260323|451107|kv1:7VJ60q1XADceuPhmq6d+83NKcx7PfJFE3BXLXZnqnkI=" and owned by "BD576DBD477ED076"
+09/07/2026 13:40:25: Session "ProbeTest" registered with join code 167812
+09/07/2026 13:40:25: Retry join-code check 99
+09/07/2026 13:40:26: Retry join-code check 98
+09/07/2026 13:40:27: Session "ProbeTest" with join code 167812 and IP 203.0.113.10:2456 is active with 0 player(s)
+09/07/2026 13:42:01: Game - OnApplicationQuit
+09/07/2026 13:42:01: Available space to current user: 261290106880. Saving is blocked if below: 4843176 bytes. Warnings are given if below: 9686352
+09/07/2026 13:42:01: Shutting down
+09/07/2026 13:42:01: ZNet Shutdown
+09/07/2026 13:42:01: PrepareSave: clone done in 0ms
+09/07/2026 13:42:01: PrepareSave: ZDOExtraData.PrepareSave done in 3 ms
+09/07/2026 13:42:01: World save writing starting
+09/07/2026 13:42:01: World save writing started
+09/07/2026 13:42:01: Saved 81 ZDOs
+09/07/2026 13:42:01: World save writing finishing
+09/07/2026 13:42:01: World save writing finished
+09/07/2026 13:42:01: World saved ( 15.742ms )
+09/07/2026 13:42:01: Considering autobackup. World time: 97.33997, short time: 7200, long time: 43200, backup count: 4
+09/07/2026 13:42:01: Skipping backup. World session not long enough.
+09/07/2026 13:42:01: Unloading unused assets
+Unloading 0 Unused Serialized files (Serialized files now loaded: 18)
+09/07/2026 13:42:01: Sending disconnect msg
+ZPlayFabMatchmaking::UnregisterServer - unregistering server now. State: Active
+09/07/2026 13:42:01: Unregister PlayFab server "ProbeTest" and leaving network "0bfdfab8-eb0a-4cfc-b94d-cd33dc6cf29a|AwBBOQufQg+8o5YTh0e8JEK3rXipA1dlc3RVcwAAAAAAAAAAAAAAAAAAQHZhtFmwm2+5xoip1gMQZO0ZPAJr9HsbOYa1hNGP3Va8FUtkbnMtaXIwLTgxZTUtNzU1MWEwN2ItODIxZC00MjI3LTgyYTgtNDZlNzQxNDgxOTFjLndlc3R1cy5jbG91ZGFwcC5henVyZS5jb20="
+ZPlayFabSocket::Dispose. State: LISTEN
+ZPlayFabSocket::Dispose. leave lobby. LobbyId: 
+ZPlayFabSocket::Dispose. State: CLOSED
+09/07/2026 13:42:01: Stopping build thread
+Unloading 1 unused Assets to reduce memory usage. Loaded Objects now: 206962.
+Total: 64.883900 ms (FindLiveObjects: 8.154200 ms CreateObjectMapping: 9.491400 ms MarkObjects: 47.126800 ms  DeleteObjects: 0.110800 ms)
+
+09/07/2026 13:42:03: ZNet OnDestroy
+09/07/2026 13:42:03: Net scene destroyed
+09/07/2026 13:42:03: Steam manager on destroy
+[Physics::Module] Cleanup current backned.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
