@@ -68,17 +68,46 @@ carved plate, with a filled versus hollow mark. Colour is the third signal.
 
 Self-hosted in `public/fonts/`. 108 KB total, works offline.
 
-- **Cinzel** — display. Inscriptional Roman capitals, letters made to be cut
-  into stone. Used for the service name, status plate, and section markers, in
-  caps with open tracking, as inscription is set.
-- **Alegreya Sans** — body. A warm humanist sans; a cold neo-grotesk would fight
-  the stone.
+- **Cinzel** — display **only**: the service name and the status plate. It is an
+  inscriptional face, built to be cut into stone at monumental size, and it
+  reads beautifully at 29px and above.
+- **Alegreya Sans** — everything else. A warm humanist sans; a cold neo-grotesk
+  would fight the stone.
 - **IBM Plex Mono** — data only, and legitimately so: join code, uptime, counts,
   timestamps, log lines. Tabular figures so numbers do not shimmer as they tick.
 
-Scale: 11px markers · 13.5px body · 15px row text · 22px section · 40px status ·
-64px join code. Tracking opens rather than tightens on display sizes, because
-carved capitals are spaced apart, not crowded.
+### The correction that mattered
+
+The first version used Cinzel for every section title, field label, button and
+chip, at 10–12.5px in tracked capitals. That is precisely what an inscriptional
+face cannot do: low x-height, wide letterforms, and heavy tracking make small
+capitals slow to read. Eleven distinct roles also sat between 10px and 13.5px,
+so nothing outranked anything and the eye had no hierarchy to follow.
+
+This was a real failure against the product: an Operate surface where, by its
+own principles, expression may never obscure the task. The carved identity is
+carried by the stone, the channels, the serpent band and the palette — it never
+needed to be carried by tiny capitals.
+
+### Role scale
+
+Six roles, spaced far enough apart to scan:
+
+| Role | Face | Size |
+|---|---|---|
+| Service name | Cinzel | 24–34px |
+| Status word | Cinzel | 20–29px |
+| Join code | Plex Mono | 33–60px |
+| Section title | Alegreya Sans 700 | 16px, sentence case |
+| Row text, inputs, prose | Alegreya Sans | 15.5px |
+| Body | Alegreya Sans | 15px |
+| Labels, chips, meta | Alegreya Sans 700 | 12.5px |
+| Notes | Alegreya Sans | 13px |
+| Mono data | Plex Mono | 13.5px |
+
+Body sits at 15px rather than the old 13.5px, with line height at 1.6: light
+text on a dark ground wants slightly more leading than the same type would on
+white.
 
 ## Materials
 
@@ -120,8 +149,10 @@ Ordered by how often the host needs each thing, not by how the code is
 organised:
 
 1. **Stone head** — serpent band, service name, status plate, join code.
-2. **Connection** — how friends actually get in, stated plainly.
-3. **Action rail** — one row of carved controls.
+2. **Action rail** — one row of carved controls.
+3. **Connection and notices** — how friends get in, and what just happened.
+   They sit *below* the rail because they report on the controls above them;
+   above, they pushed the controls down and read as a header banner.
 4. **Connected** — who is on.
 5. **World & server**, then **Gameplay** — the settings form.
 6. **Backups**.

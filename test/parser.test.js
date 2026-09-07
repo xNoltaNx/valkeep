@@ -135,7 +135,7 @@ test('parses the real session-activation line', () => {
 test('parses the real session-creation line, whose join code is still empty', () => {
   const p = createParser(patterns);
   const e = p.feed('09/07/2026 13:40:24: New session server "ProbeTest" that has join code , now 0 player(s)');
-  assert.equal(e[0].type, 'sessionNew');
+  assert.equal(e[0].type, 'nowPlayers');
   assert.equal(e[0].players, '0');
   // An empty code must not overwrite a real one recorded earlier.
   assert.equal(p.snapshot().joinCode, null);
@@ -203,4 +203,59 @@ test('resetSession is safe to call on a fresh parser', () => {
   const p = createParser(patterns);
   assert.doesNotThrow(() => p.resetSession());
   assert.equal(p.snapshot().joinCode, null);
+});
+
+// Captured from a real crossplay client joining on 2026-09-07. Every pattern
+// below failed against this session before these fixtures existed: the old
+// ones assumed Steam's numeric ids and matched none of the join sequence.
+
+test('parses a crossplay handshake, whose id is not numeric', () => {
+  const p = createParser(patterns);
+  const e = p.feed('09/07/2026 16:22:11: Got handshake from client playfab/D63284D33385051A');
+  assert.equal(e[0].type, 'handshake');
+  assert.equal(e[0].id, 'playfab/D63284D33385051A');
+});
+
+test('parses the Platform User ID line, which is the id the access lists use', () => {
+  const p = createParser(patterns);
+  const e = p.feed('09/07/2026 16:22:11: PlayFab socket with remote ID playfab/D63284D33385051A received local Platform ID Steam_76561190000000002');
+  assert.equal(e[0].type, 'platformId');
+  assert.equal(e[0].id, 'Steam_76561190000000002');
+  assert.equal(e[0].socket, 'playfab/D63284D33385051A');
+});
+
+test('parses a real player-joined line and takes its count', () => {
+  const p = createParser(patterns);
+  p.feed('09/07/2026 16:22:11: Player joined server "Valheim Squad" that has join code 055286, now 1 player(s)');
+  const s = p.snapshot();
+  assert.equal(s.playerCount, 1);
+  assert.equal(s.joinCode, '055286');
+});
+
+test('parses a negative ZDO id, which a real spawn produced', () => {
+  const p = createParser(patterns);
+  const e = p.feed('09/07/2026 16:22:31: Got character ZDOID from Kettil : -359821990:2');
+  assert.equal(e[0].name, 'Kettil');
+  assert.equal(e[0].isDeath, false);
+});
+
+test('never reports fewer players than it can name', () => {
+  const p = createParser(patterns);
+  // The server said zero, then someone spawned. Reporting 0 beside a listed
+  // player is the interface arguing with itself.
+  p.feed('Session "S" with join code 055286 and IP 1.2.3.4:2456 is active with 0 player(s)');
+  p.feed('Got character ZDOID from Kettil : -359821990:2');
+  const s = p.snapshot();
+  assert.equal(s.playerCount, 1);
+  assert.equal(s.playerCountSource, 'characters');
+  assert.deepEqual(s.players, ['Kettil']);
+});
+
+test('a higher reported count still wins over the names we know', () => {
+  const p = createParser(patterns);
+  p.feed('Got character ZDOID from Kettil : -359821990:2');
+  p.feed('Player joined server "S" that has join code 055286, now 3 player(s)');
+  const s = p.snapshot();
+  assert.equal(s.playerCount, 3, 'two more people are on than we can name');
+  assert.equal(s.playerCountSource, 'session');
 });

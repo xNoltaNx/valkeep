@@ -67,7 +67,12 @@ async function recoverSession() {
   try {
     const text = readFileSync(join(logsDir(), 'server.log'), 'utf8');
     for (const line of text.split(/\r?\n/)) {
-      if (line) roster.apply(parser.feed(line));
+      if (!line) continue;
+      roster.apply(parser.feed(line));
+      // Fill the console too, or a restarted panel shows an empty log beside a
+      // server that is plainly running.
+      recentLines.push(line);
+      if (recentLines.length > RECENT_MAX) recentLines.shift();
     }
     const snap = parser.snapshot();
     if (snap.joinCode) console.log(`Recovered the running session: join code ${snap.joinCode}`);

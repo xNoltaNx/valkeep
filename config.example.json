@@ -21,14 +21,15 @@
   "backupIntervalMinutes": 30,
   "backupRetention": 24,
   "logPatterns": {
-    "handshake": "Got handshake from client (?<id>\\d+)",
-    "connected": "Got connection SteamID (?<id>\\d+)",
-    "disconnected": "Closing socket (?<id>\\d+)",
+    "handshake": "Got handshake from client (?<id>[\\w/.:-]+)",
+    "connected": "Got connection SteamID (?<id>[\\w/.:-]+)",
+    "disconnected": "Closing socket (?<id>[\\w/.:-]+)",
+    "platformId": "remote ID (?<socket>[\\w/.:-]+) received local Platform ID (?<id>[\\w/.:-]+)",
     "character": "Got character ZDOID from (?<name>.+?) : (?<zdo>-?\\d+):(?<rev>\\d+)",
-    "worldSaved": "World saved *\\( *(?<ms>[\\d.]+)ms *\\)",
-    "joinCode": "Session \"(?<session>.*?)\" registered with join code (?<code>\\d+)",
+    "nowPlayers": "that has join code (?<code>\\d*), now (?<players>\\d+) player",
     "heartbeat": "Session \"(?<session>.*?)\" with join code (?<code>\\d+).*? is active with (?<players>\\d+) player",
-    "sessionNew": "New session server \"(?<session>.*?)\" that has join code (?<code>\\d*), now (?<players>\\d+) player",
+    "joinCode": "Session \"(?<session>.*?)\" registered with join code (?<code>\\d+)",
+    "worldSaved": "World saved *\\( *(?<ms>[\\d.]+)ms *\\)",
     "publicAddress": "serverIP used to register the server: (?<address>[\\d.]+:\\d+)"
   }
 }

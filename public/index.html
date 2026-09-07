@@ -60,13 +60,6 @@
   </div>
 </header>
 
-<div class="connection" id="connection" data-reachable="false">
-  <svg class="connection__mark" aria-hidden="true"><use href="#i-players"></use></svg>
-  <p id="connectionText">Checking how friends can reach this server.</p>
-</div>
-
-<div id="notices" role="status" aria-live="polite"></div>
-
 <!-- 2. Main controls -->
 <nav class="rail" aria-label="Server controls">
   <button class="rail__btn" id="btnStart" type="button">
@@ -85,6 +78,13 @@
     <svg class="ico" aria-hidden="true"><use href="#i-update"></use></svg><span>Update server</span>
   </button>
 </nav>
+
+<div class="connection" id="connection" data-reachable="false">
+  <svg class="connection__mark" aria-hidden="true"><use href="#i-players"></use></svg>
+  <p id="connectionText">Checking how friends can reach this server.</p>
+</div>
+
+<div id="notices" role="status" aria-live="polite"></div>
 
 <main>
 
@@ -105,7 +105,6 @@
     <p class="empty" id="playersEmpty">Nobody is connected.</p>
   </div>
 </section>
-
 
 <!-- 4. Players & access -->
 <section class="board" data-biome="plains" data-key="access">

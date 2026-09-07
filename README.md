@@ -3,7 +3,7 @@
 A LAN-only control panel for a Valheim dedicated server running on a home
 Windows PC. Start, stop, monitor, back up, and update the server from a browser.
 
-![The board](docs/v5-desktop.png)
+![The board](docs/type-desktop.png)
 
 ## Running it
 

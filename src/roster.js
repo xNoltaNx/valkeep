@@ -103,10 +103,14 @@ export function createRoster({ load = true, file = null } = {}) {
 
   function apply(events) {
     for (const event of events) {
-      if (event.type === 'connected') connected(event.id);
+      // On crossplay there is no "Got connection SteamID" line at all. The
+      // Platform ID line is the only place a real player id appears, and it is
+      // the id the access lists use, so it is the preferred identity.
+      if (event.type === 'platformId') connected(event.id);
+      else if (event.type === 'connected') connected(event.id);
       else if (event.type === 'character' && !event.isDeath) named(event.name);
       else if (event.type === 'disconnected') disconnected(event.id);
-      else if ((event.type === 'heartbeat' || event.type === 'sessionNew')
+      else if ((event.type === 'heartbeat' || event.type === 'nowPlayers')
         && Number(event.players) === 0) allOffline();
     }
   }

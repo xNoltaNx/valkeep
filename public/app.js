@@ -132,8 +132,9 @@ function renderStatus(s) {
 
   // A server we adopted rather than started has no known start time, and
   // showing 0m 00s would be a confident lie.
-  el.uptime.textContent = !s.running ? "--"
-    : (s.adopted && !s.startedAt) ? "unknown" : duration(s.uptimeSeconds);
+  el.uptime.textContent = !s.running ? '--'
+    : s.uptimeSeconds > 0 ? duration(s.uptimeSeconds)
+    : 'unknown';
 
   if (s.joinCode) {
     el.joinCode.textContent = s.joinCode;

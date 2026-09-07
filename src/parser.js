@@ -27,7 +27,8 @@ export function createParser(patterns) {
   let seq = 0;
 
   const state = {
-    names: new Map(),          // player name -> last seen timestamp
+    characters: new Map(),     // character name -> last seen timestamp
+    names: new Map(),          // platform id -> character name, when known
     sockets: new Set(),        // connection ids currently open
     heartbeatCount: null,      // count as last reported by the server
     heartbeatSeq: -1,          // when that count arrived
@@ -57,7 +58,7 @@ export function createParser(patterns) {
           // ZDOID fires on death as well as spawn. A zdo of 0 is a death, so
           // this line is a name source and never a join event.
           event.isDeath = g.zdo === '0';
-          if (!event.isDeath && g.name) state.names.set(g.name, Date.now());
+          if (!event.isDeath && g.name) state.characters.set(g.name, Date.now());
           break;
         }
         case 'connected': {
@@ -78,7 +79,13 @@ export function createParser(patterns) {
           if (g.code) state.joinCode = g.code;
           break;
         }
-        case 'sessionNew':
+        case 'platformId': {
+          // The one line that states a player's Platform User ID - the id the
+          // admin and ban lists are keyed on.
+          if (g.id) state.names.set(g.id, state.names.get(g.id) ?? null);
+          break;
+        }
+        case 'nowPlayers':
         case 'heartbeat': {
           if (g.code) state.joinCode = g.code;
           if (g.players !== undefined) {
@@ -86,6 +93,7 @@ export function createParser(patterns) {
             state.heartbeatSeq = ++seq;
             if (state.heartbeatCount === 0) {
               state.sockets.clear();
+              state.characters.clear();
               state.names.clear();
             }
           }
@@ -116,13 +124,20 @@ export function createParser(patterns) {
    * the UI can be honest about confidence.
    */
   function playerCount() {
-    if (state.heartbeatCount === null) {
-      return { count: state.sockets.size, source: 'connections' };
+    const named = state.characters.size;
+
+    let base;
+    if (state.heartbeatCount === null || state.socketsSeq > state.heartbeatSeq) {
+      base = { count: state.sockets.size, source: 'connections' };
+    } else {
+      base = { count: state.heartbeatCount, source: 'session' };
     }
-    if (state.socketsSeq > state.heartbeatSeq) {
-      return { count: state.sockets.size, source: 'connections' };
-    }
-    return { count: state.heartbeatCount, source: 'session' };
+
+    // Never report fewer players than we can actually name. Showing "0" next
+    // to a list of people who are plainly on the server is worse than either
+    // number alone.
+    if (named > base.count) return { count: named, source: 'characters' };
+    return base;
   }
 
   /**
@@ -134,6 +149,7 @@ export function createParser(patterns) {
    * is a code the host would actually send to friends.
    */
   function resetSession() {
+    state.characters.clear();
     state.names.clear();
     state.sockets.clear();
     state.heartbeatCount = null;
@@ -147,7 +163,7 @@ export function createParser(patterns) {
   function snapshot() {
     const { count, source } = playerCount();
     return {
-      players: [...state.names.keys()],
+      players: [...state.characters.keys()],
       playerCount: count,
       playerCountSource: source,
       openSockets: state.sockets.size,

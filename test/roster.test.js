@@ -119,3 +119,30 @@ test('records first and last seen', () => {
   assert.ok(p.firstSeen > 0);
   assert.ok(p.lastSeen >= p.firstSeen);
 });
+
+// On crossplay there is no "Got connection SteamID" line, so the roster
+// learned nothing about real players. Captured 2026-09-07.
+const PLATFORM = id => ({ type: 'platformId', id, socket: 'playfab/D63284D33385051A' });
+
+test('identifies a crossplay player by Platform User ID', () => {
+  const r = fresh();
+  r.apply([PLATFORM('Steam_76561190000000002'), NAME('Kettil', '-359821990')]);
+  const [p] = r.list();
+  assert.equal(p.id, 'Steam_76561190000000002');
+  assert.equal(p.name, 'Kettil');
+  assert.equal(p.online, true);
+});
+
+test('the recorded id is the one the access lists use', () => {
+  const r = fresh();
+  r.apply([PLATFORM('Steam_76561190000000002')]);
+  assert.match(r.list()[0].id, /^[A-Za-z]+_\d+$/,
+    'must be [Platform]_[UserID], not a playfab socket id');
+});
+
+test('a zero count from a real join line clears everyone', () => {
+  const r = fresh();
+  r.apply([PLATFORM('Steam_1'), NAME('Kettil')]);
+  r.apply([{ type: 'nowPlayers', players: '0', code: '055286' }]);
+  assert.equal(r.list().filter(p => p.online).length, 0);
+});
