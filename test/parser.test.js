@@ -259,3 +259,59 @@ test('a higher reported count still wins over the names we know', () => {
   assert.equal(s.playerCount, 3, 'two more people are on than we can name');
   assert.equal(s.playerCountSource, 'session');
 });
+
+// Captured from a real crossplay disconnect on 2026-09-07. Crossplay never
+// prints "Closing socket", so before these lines the only leave signal was the
+// count reaching zero - which silently left ghosts whenever more than one
+// person was on.
+
+test('reaping a player zdo marks that player as gone', () => {
+  const p = createParser(patterns);
+  p.feed('09/07/2026 16:39:43: Got character ZDOID from Kettil : -1622339990:2');
+  assert.deepEqual(p.snapshot().players, ['Kettil']);
+
+  const e = p.feed('09/07/2026 16:42:43: Destroying abandoned non persistent zdo -1622339990:1 owner -1622339990');
+  assert.equal(e[0].type, 'abandonedZdo');
+  assert.equal(e[0].left, true);
+  assert.equal(e[0].name, 'Kettil');
+  assert.deepEqual(p.snapshot().players, []);
+});
+
+test('the reap fires once, not once per object', () => {
+  const p = createParser(patterns);
+  p.feed('Got character ZDOID from Kettil : -1622339990:2');
+  const first = p.feed('Destroying abandoned non persistent zdo -1622339990:1 owner -1622339990');
+  const rest = p.feed('Destroying abandoned non persistent zdo -1622339990:87 owner -1622339990');
+  assert.equal(first[0].left, true);
+  assert.notEqual(rest[0].left, true, 'a real disconnect prints this line many times');
+});
+
+test('one player leaving does not remove the others', () => {
+  const p = createParser(patterns);
+  p.feed('Got character ZDOID from Kettil : -1622339990:2');
+  p.feed('Got character ZDOID from Bjorn : -777777777:2');
+  p.feed('Destroying abandoned non persistent zdo -1622339990:1 owner -1622339990');
+  assert.deepEqual(p.snapshot().players, ['Bjorn'], 'only the leaver goes');
+});
+
+test('an abandoned zdo for an unknown owner is ignored', () => {
+  const p = createParser(patterns);
+  const e = p.feed('Destroying abandoned non persistent zdo -999:1 owner -999');
+  assert.notEqual(e[0]?.left, true);
+});
+
+test('rejoining after a leave works', () => {
+  const p = createParser(patterns);
+  p.feed('Got character ZDOID from Kettil : -1622339990:2');
+  p.feed('Destroying abandoned non persistent zdo -1622339990:1 owner -1622339990');
+  p.feed('Got character ZDOID from Kettil : -1622339990:2');
+  assert.deepEqual(p.snapshot().players, ['Kettil']);
+});
+
+test('parses the real connection-lost line and clears the count', () => {
+  const p = createParser(patterns);
+  p.feed('Player joined server "Valheim Squad" that has join code 756222, now 1 player(s)');
+  assert.equal(p.snapshot().playerCount, 1);
+  p.feed('09/07/2026 16:42:43: Player connection lost server "Valheim Squad" that has join code 756222, now 0 player(s)');
+  assert.equal(p.snapshot().playerCount, 0);
+});

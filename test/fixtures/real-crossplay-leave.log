@@ -1,0 +1,184 @@
+Mono path[0] = 'E:/ai-projects/valheim-server/server/valheim_server_Data/Managed'
+Mono config path = 'E:/ai-projects/valheim-server/server/MonoBleedingEdge/etc'
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Initialize engine version: 6000.0.61f1 (74a0adb02c31)
+[Subsystems] Discovering subsystems at path E:/ai-projects/valheim-server/server/valheim_server_Data/UnitySubsystems
+Forcing GfxDevice: Null
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+NullGfxDevice:
+    Version:  NULL 1.0 [1.0]
+    Renderer: Null Device
+    Vendor:   Unity Technologies
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.074 seconds
+- Finished resetting the current domain, in  0.001 seconds
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Microsoft Media Foundation video decoding to texture disabled: graphics device is Null, only Direct3D 11 and Direct3D 12 (only on desktop) are supported for hardware-accelerated video decoding.
+UnloadTime: 0.190300 ms
+09/07/2026 16:37:55: Set background loading budget to Low
+09/07/2026 16:37:55: Loading first scene!
+09/07/2026 16:37:55: Preferences initialized! Activating first scene!
+Unloading 4 Unused Serialized files (Serialized files now loaded: 8)
+UnloadTime: 0.028500 ms
+09/07/2026 16:37:55: Can't return the graphics config when it's not loaded!
+09/07/2026 16:37:55: 
+09/07/2026 16:37:55: Starting to load scene:start.unity (169d7618616154c03be07e9ad3af5893)
+09/07/2026 16:37:55: Set background loading budget to Normal
+09/07/2026 16:37:55: Loaded localization file #0 - 'localization' language: 'English'
+09/07/2026 16:37:55: Loaded localization file #1 - 'localization_extra' language: 'English'
+09/07/2026 16:37:55: Loaded localization file #2 - 'heightmap_message' language: 'English'
+09/07/2026 16:37:55: Loaded localization file #3 - 'localization_witch' language: 'English'
+09/07/2026 16:37:55: Loaded localization file #4 - 'localization_ashlands' language: 'English'
+09/07/2026 16:37:55: Loaded localization file #5 - 'localization_captions' language: 'English'
+09/07/2026 16:37:55: Loaded localization file #6 - 'localization_combatupdate' language: 'English'
+09/07/2026 16:37:55: Loaded localization file #7 - 'localization_celebrationupdate' language: 'English'
+Unloading 170 unused Assets to reduce memory usage. Loaded Objects now: 2416.
+Total: 1.662300 ms (FindLiveObjects: 0.101500 ms CreateObjectMapping: 0.026600 ms MarkObjects: 1.427000 ms  DeleteObjects: 0.107000 ms)
+
+The referenced script on this Behaviour (Game Object '<null>') is missing!
+Unloading 2 Unused Serialized files (Serialized files now loaded: 17)
+09/07/2026 16:37:59: Set background loading budget to High
+09/07/2026 16:37:59: GPU Device: 0000:0000 (Unknown)
+09/07/2026 16:37:59: Set background loading budget to Low
+UnloadTime: 4.817700 ms
+HDR Render Texture not supported, disabling HDR on reflection probe.
+09/07/2026 16:37:59: Missing audio clip in music respawn
+OnGUI function detected on MonoBehaviour, but not called, because IMGUI module is stripped.
+09/07/2026 16:37:59: Setting -savedir to: C:\Users\player\AppData\LocalLow\IronGate\Valheim
+09/07/2026 16:37:59: Setting -logfile to: E:\ai-projects\valheim-server\data\logs\server.log
+09/07/2026 16:37:59: Get create world ProbeWorld
+09/07/2026 16:37:59: Using steam_appid.txt
+09/07/2026 16:37:59: Using steam APPID:892970
+Setting breakpad minidump AppID = 892970
+SteamInternal_SetMinidumpSteamID:  Caching Steam ID:  76561197960265728 [API loaded no]
+09/07/2026 16:37:59: Server ID 90071992547409920
+09/07/2026 16:37:59: Authentication:k_ESteamNetworkingAvailability_Waiting
+09/07/2026 16:37:59: Steam game server initialized
+09/07/2026 16:37:59: Valheim version: 0.221.12 (network version 36)
+09/07/2026 16:37:59: Worldgenerator version setup:2
+09/07/2026 16:37:59: Console: Valheim 0.221.12 (network version 36)
+09/07/2026 16:37:59: Console: 
+09/07/2026 16:37:59: Console: type "help" - for commands
+09/07/2026 16:37:59: Console: 
+09/07/2026 16:37:59: Render threading mode:SingleThreaded
+OnGUI function detected on MonoBehaviour, but not called, because IMGUI module is stripped.
+09/07/2026 16:38:00: Builder started
+09/07/2026 16:38:00: Vis equip model set to 1
+09/07/2026 16:38:00: Sending PlayFab login request (attempt 1)
+09/07/2026 16:38:00: Login postponed until ID has been set.
+The shader Hidden/Dof/DepthOfFieldHdr (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.DepthOfField) is not supported on this platform!
+The image effect Main Camera (UnityStandardAssets.ImageEffects.DepthOfField) has been disabled as it's not supported on the current platform.
+The shader Hidden/SunShaftsComposite (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) is not supported on this platform!
+The shader Hidden/SimpleClear (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) is not supported on this platform!
+The image effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) has been disabled as it's not supported on the current platform.
+09/07/2026 16:38:00: Starting music menu
+Unloading 93784 unused Assets to reduce memory usage. Loaded Objects now: 208107.
+Total: 94.349700 ms (FindLiveObjects: 12.622000 ms CreateObjectMapping: 18.234300 ms MarkObjects: 39.700300 ms  DeleteObjects: 23.792700 ms)
+
+The referenced script on this Behaviour (Game Object '<null>') is missing!
+The referenced script on this Behaviour (Game Object '<null>') is missing!
+Unloading 3 Unused Serialized files (Serialized files now loaded: 18)
+UnloadTime: 8.716500 ms
+HDR Render Texture not supported, disabling HDR on reflection probe.
+HDR Render Texture not supported, disabling HDR on reflection probe.
+09/07/2026 16:38:00: Audioman already exist, destroying self
+OnGUI function detected on MonoBehaviour, but not called, because IMGUI module is stripped.
+src\clientdll\cminterface.cpp (2253) : !BLoggedOn()
+src\clientdll\cminterface.cpp (2253) : !BLoggedOn()
+09/07/2026 16:38:00: Console: Valheim 0.221.12 (network version 36)
+09/07/2026 16:38:00: Console: 
+09/07/2026 16:38:00: Console: type "help" - for commands
+09/07/2026 16:38:00: Console: 
+09/07/2026 16:38:00: isModded: False
+09/07/2026 16:38:00: Zonesystem Awake 28524
+09/07/2026 16:38:00: DungeonDB Awake 28524
+09/07/2026 16:38:00: Worldgenerator version setup:2
+OnGUI function detected on MonoBehaviour, but not called, because IMGUI module is stripped.
+ArgumentNullException: Value cannot be null.
+Parameter name: shader
+  at UnityEngine.Bindings.ThrowHelper.ThrowArgumentNullException (System.Object obj, System.String parameterName) [0x00018] in <89f741081c874c65b780dbd6a0d8d33e>:0 
+  at UnityEngine.Material.CreateWithShader (UnityEngine.Material self, UnityEngine.Shader shader) [0x00003] in <89f741081c874c65b780dbd6a0d8d33e>:0 
+  at UnityEngine.Material..ctor (UnityEngine.Shader shader) [0x00008] in <89f741081c874c65b780dbd6a0d8d33e>:0 
+  at ShieldDomeImageEffect.Awake () [0x0000b] in <c366779df99d449da9e16b4e0a4d1800>:0 
+
+09/07/2026 16:38:02: Console: /w [text] - Whisper
+09/07/2026 16:38:02: Console: /s [text] - Shout
+09/07/2026 16:38:02: Console: /die - Kill yourself
+09/07/2026 16:38:02: Console: /resetspawn - Reset spawn point
+09/07/2026 16:38:02: Console: /[emote]
+09/07/2026 16:38:02: Console: Emotes: wave, sit, challenge, cheer, nonono, thumbsup, point, blowkiss, bow, cower, cry, despair, flex, comehere, headbang, kneel, laugh, roar, shrug, dance, relax, toast, rest, vibe, loveyou
+09/07/2026 16:38:02: Console: 
+Unloading 380 unused Assets to reduce memory usage. Loaded Objects now: 206066.
+Total: 78.911700 ms (FindLiveObjects: 8.740600 ms CreateObjectMapping: 11.069400 ms MarkObjects: 58.715500 ms  DeleteObjects: 0.385800 ms)
+
+09/07/2026 16:38:02: Zonesystem Start 28524
+09/07/2026 16:38:02: Added 3 locations, 0 vegetations, 0 environments, 0 biome env-setups, 0 clutter  from main
+09/07/2026 16:38:02: Added 1 locations, 0 vegetations, 2 environments, 0 biome env-setups, 0 clutter  from main
+09/07/2026 16:38:02: Added 27 locations, 25 vegetations, 5 environments, 1 biome env-setups, 3 clutter  from main
+09/07/2026 16:38:02: Added 4 locations, 0 vegetations, 1 environments, 0 biome env-setups, 0 clutter  from main
+09/07/2026 16:38:02: Added 25 locations, 33 vegetations, 8 environments, 2 biome env-setups, 2 clutter  from main
+09/07/2026 16:38:02: DungeonDB Start 28524
+09/07/2026 16:38:02: ZRpc timeout set to 30s 
+09/07/2026 16:38:02: ZNET START
+09/07/2026 16:38:02: Load world: ProbeWorld (ProbeWorld)
+09/07/2026 16:38:02: Loading 12480 zdos, my sessionID: 180266990, data version: 37
+09/07/2026 16:38:02: Loading in ZDOs
+09/07/2026 16:38:02: Adding to Dictionary
+09/07/2026 16:38:02: Adding to Sectors
+09/07/2026 16:38:02: Connecting Portals, Spawners & ZSyncTransforms
+09/07/2026 16:38:02: Loaded 11361 locations
+09/07/2026 16:38:02: Unloading unused assets
+Unloading 0 Unused Serialized files (Serialized files now loaded: 18)
+09/07/2026 16:38:03: PlayFab custom ID set to "PlayFab_Valheim Squad_2456_9ebd1dba6fa5d8a3ad84825e44a0d45d3e9893c3"
+09/07/2026 16:38:03: Sending PlayFab login request (attempt 2)
+09/07/2026 16:38:03: Semaphore type: SemaphoreSlim
+09/07/2026 16:38:03: Opened PlayFab server
+The shader Hidden/Dof/DepthOfFieldHdr (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.DepthOfField) is not supported on this platform!
+The image effect Main Camera (UnityStandardAssets.ImageEffects.DepthOfField) has been disabled as it's not supported on the current platform.
+The shader Hidden/SunShaftsComposite (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) is not supported on this platform!
+The shader Hidden/SimpleClear (UnityEngine.Shader) on effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) is not supported on this platform!
+The image effect Main Camera (UnityStandardAssets.ImageEffects.SunShafts) has been disabled as it's not supported on the current platform.
+09/07/2026 16:38:03: Game server connected
+Unloading 2 unused Assets to reduce memory usage. Loaded Objects now: 209092.
+Total: 78.913100 ms (FindLiveObjects: 9.509400 ms CreateObjectMapping: 15.072100 ms MarkObjects: 54.213300 ms  DeleteObjects: 0.118100 ms)
+
+09/07/2026 16:38:03: Logged in PlayFab user via custom ID
+09/07/2026 16:38:03: PlayFab logged in as "PlayFab_Valheim Squad_2456_9ebd1dba6fa5d8a3ad84825e44a0d45d3e9893c3"
+09/07/2026 16:38:03: PlayFab local entity ID is C8B223EBC42674B
+IPv4, returning 203.0.113.10:2456
+09/07/2026 16:38:03: New session server "Valheim Squad" that has join code , now 0 player(s)
+09/07/2026 16:38:03: Register PlayFab server "Valheim Squad" with IP 203.0.113.10:2456
+09/07/2026 16:38:03: Server 'Valheim Squad' begin PlayFab create and join network for server 
+09/07/2026 16:38:04: Joined PlayFab Party network with ID "20ab1a31-2893-4d65-acb9-a8e601e92880|AwDL4AIWzNhMLz/Z8UyErHlyYlEjQFdlc3RVcwAAAAAAAAAAAAAAAAAA4XphtFmwm2+5xoip1gMQZO0ZPAJr9HsbOYa1hNGP3Va8FUtkbnMtaXIwLTgxZTUtNGI0YjdmMjctNTY1My00OGFkLTg3N2QtMGRkNDg1NjVhY2YxLndlc3R1cy5jbG91ZGFwcC5henVyZS5jb20="
+This is the serverIP used to register the server: 203.0.113.10:2456
+09/07/2026 16:38:04: Created PlayFab lobby with ID "57900271-0b69-4776-b7ee-418d3b960c27.r-20260323", ConnectionString "cv2:57900271-0b69-4776-b7ee-418d3b960c27.r-20260323|451107|kv1:Io0l23GDytO/VZipUDGYtl+qJotZF7X59nl2gscy/z4=" and owned by "C8B223EBC42674B"
+09/07/2026 16:38:04: Session "Valheim Squad" registered with join code 756222
+09/07/2026 16:38:04: Retry join-code check 99
+09/07/2026 16:38:06: Session "Valheim Squad" with join code 756222 and IP 203.0.113.10:2456 is active with 0 player(s)
+09/07/2026 16:39:24: PlayFab listen socket child connected to remote player D63284D33385051A
+09/07/2026 16:39:24: Player joined server "Valheim Squad" that has join code 756222, now 1 player(s)
+09/07/2026 16:39:24: Muted PlayFab remote player D63284D33385051A
+09/07/2026 16:39:24: PlayFab socket with remote ID playfab/D63284D33385051A received local Platform ID Steam_76561190000000002
+09/07/2026 16:39:24: ZRpc timeout set to 90s 
+09/07/2026 16:39:24: Got handshake from client playfab/D63284D33385051A
+09/07/2026 16:39:28: Network version check, their:36, mine:36
+09/07/2026 16:39:28: Server: New peer connected,sending global keys
+09/07/2026 16:39:43: Got character ZDOID from Kettil : -1622339990:2
+09/07/2026 16:42:43: RPC_Disconnect
+09/07/2026 16:42:43: Destroying abandoned non persistent zdo -1622339990:1 owner -1622339990
+09/07/2026 16:42:43: Destroying abandoned non persistent zdo -1622339990:2 owner -1622339990
+09/07/2026 16:42:43: Destroying abandoned non persistent zdo -1622339990:16 owner -1622339990
+09/07/2026 16:42:43: Destroying abandoned non persistent zdo -1622339990:87 owner -1622339990
+09/07/2026 16:42:43: Destroying abandoned non persistent zdo -1622339990:74 owner -1622339990
+09/07/2026 16:42:43: Destroying abandoned non persistent zdo -1622339990:95 owner -1622339990
+ZPlayFabSocket::Dispose. State: CONNECTED
+ZPlayFabSocket::Dispose. leave lobby. LobbyId: 
+ZPlayFabSocket::Dispose. State: CLOSED
+09/07/2026 16:42:43: Player connection lost server "Valheim Squad" that has join code 756222, now 0 player(s)

@@ -146,3 +146,23 @@ test('a zero count from a real join line clears everyone', () => {
   r.apply([{ type: 'nowPlayers', players: '0', code: '055286' }]);
   assert.equal(r.list().filter(p => p.online).length, 0);
 });
+
+const ZDO_REAP = (owner, name) => ({ type: 'abandonedZdo', owner, left: true, name });
+
+test('a crossplay leave marks only that player offline', () => {
+  const r = fresh();
+  r.apply([PLATFORM('Steam_1'), NAME('Kettil', '-1622339990')]);
+  r.apply([{ type: 'platformId', id: 'Steam_2', socket: 'playfab/B' }, NAME('Bjorn', '-777')]);
+  r.apply([ZDO_REAP('-1622339990', 'Kettil')]);
+
+  const byName = Object.fromEntries(r.list().map(p => [p.name, p]));
+  assert.equal(byName.Kettil.online, false);
+  assert.equal(byName.Bjorn.online, true, 'the other player must not be dragged offline');
+});
+
+test('a leave for an unknown name changes nothing', () => {
+  const r = fresh();
+  r.apply([PLATFORM('Steam_1'), NAME('Kettil')]);
+  r.apply([ZDO_REAP('-999', 'Nobody')]);
+  assert.equal(r.list()[0].online, true);
+});

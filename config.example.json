@@ -30,6 +30,7 @@
     "heartbeat": "Session \"(?<session>.*?)\" with join code (?<code>\\d+).*? is active with (?<players>\\d+) player",
     "joinCode": "Session \"(?<session>.*?)\" registered with join code (?<code>\\d+)",
     "worldSaved": "World saved *\\( *(?<ms>[\\d.]+)ms *\\)",
-    "publicAddress": "serverIP used to register the server: (?<address>[\\d.]+:\\d+)"
+    "publicAddress": "serverIP used to register the server: (?<address>[\\d.]+:\\d+)",
+    "abandonedZdo": "Destroying abandoned non persistent zdo -?\\d+:\\d+ owner (?<owner>-?\\d+)"
   }
 }

@@ -28,6 +28,8 @@ export function createParser(patterns) {
 
   const state = {
     characters: new Map(),     // character name -> last seen timestamp
+    zdoOwners: new Map(),      // character zdo id -> character name
+    reaped: new Set(),         // zdo owners already treated as gone
     names: new Map(),          // platform id -> character name, when known
     sockets: new Set(),        // connection ids currently open
     heartbeatCount: null,      // count as last reported by the server
@@ -58,7 +60,14 @@ export function createParser(patterns) {
           // ZDOID fires on death as well as spawn. A zdo of 0 is a death, so
           // this line is a name source and never a join event.
           event.isDeath = g.zdo === '0';
-          if (!event.isDeath && g.name) state.characters.set(g.name, Date.now());
+          if (!event.isDeath && g.name) {
+            state.characters.set(g.name, Date.now());
+            // The zdo id is the only thing tying a leave back to a person.
+            if (g.zdo) {
+              state.zdoOwners.set(g.zdo, g.name);
+              state.reaped.delete(g.zdo);
+            }
+          }
           break;
         }
         case 'connected': {
@@ -79,6 +88,30 @@ export function createParser(patterns) {
           if (g.code) state.joinCode = g.code;
           break;
         }
+        case 'abandonedZdo': {
+          /*
+           * Crossplay never prints "Closing socket", so before this the only
+           * disconnect signal was the player count reaching zero. That is fine
+           * for the last person to leave and wrong for everyone else: with two
+           * players, one leaving took the count 2 -> 1 and nobody was marked
+           * offline, leaving a ghost in the list.
+           *
+           * When a player disconnects the server reaps their zdos, and the
+           * owner id is the same id their character spawned with. That is a
+           * per-player leave. The reap prints once per object, so it is
+           * deduplicated to the first line for an owner.
+           */
+          const owner = g.owner;
+          if (owner && state.zdoOwners.has(owner) && !state.reaped.has(owner)) {
+            state.reaped.add(owner);
+            const name = state.zdoOwners.get(owner);
+            state.characters.delete(name);
+            state.socketsSeq = ++seq;
+            event.name = name;
+            event.left = true;
+          }
+          break;
+        }
         case 'platformId': {
           // The one line that states a player's Platform User ID - the id the
           // admin and ban lists are keyed on.
@@ -94,6 +127,8 @@ export function createParser(patterns) {
             if (state.heartbeatCount === 0) {
               state.sockets.clear();
               state.characters.clear();
+              state.zdoOwners.clear();
+              state.reaped.clear();
               state.names.clear();
             }
           }
@@ -150,6 +185,8 @@ export function createParser(patterns) {
    */
   function resetSession() {
     state.characters.clear();
+    state.zdoOwners.clear();
+    state.reaped.clear();
     state.names.clear();
     state.sockets.clear();
     state.heartbeatCount = null;

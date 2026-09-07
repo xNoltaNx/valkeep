@@ -84,6 +84,17 @@ export function createRoster({ load = true, file = null } = {}) {
     persist();
   }
 
+  /** A crossplay leave arrives with a character name, not an id. */
+  function leftByName(name) {
+    if (!name) return;
+    for (const [id, player] of players) {
+      if (player.name === name && online.has(id)) {
+        disconnected(id);
+        return;
+      }
+    }
+  }
+
   function disconnected(id) {
     if (!id) return;
     online.delete(id);
@@ -110,6 +121,7 @@ export function createRoster({ load = true, file = null } = {}) {
       else if (event.type === 'connected') connected(event.id);
       else if (event.type === 'character' && !event.isDeath) named(event.name);
       else if (event.type === 'disconnected') disconnected(event.id);
+      else if (event.type === 'abandonedZdo' && event.left) leftByName(event.name);
       else if ((event.type === 'heartbeat' || event.type === 'nowPlayers')
         && Number(event.players) === 0) allOffline();
     }
@@ -128,5 +140,5 @@ export function createRoster({ load = true, file = null } = {}) {
     return had;
   }
 
-  return { apply, connected, named, disconnected, allOffline, list, forget };
+  return { apply, connected, named, disconnected, leftByName, allOffline, list, forget };
 }
