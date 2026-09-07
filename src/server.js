@@ -20,6 +20,8 @@ import { listWorlds } from './worlds.js';
 import { MODIFIERS, TOGGLES, PRESETS } from './gameplay.js';
 import { LISTS, readAll, setMembership } from './access.js';
 import { createRoster } from './roster.js';
+import { createDiagnostics } from './diagnostics.js';
+import { rememberProfile } from './profiles.js';
 
 if (!existsSync(configFile())) {
   copyFileSync(join(ROOT, 'config.example.json'), configFile());
@@ -32,6 +34,8 @@ let config = loadConfig();
 const hub = createHub();
 const parser = createParser(config.logPatterns);
 const roster = createRoster();
+const diagnostics = createDiagnostics();
+let lastDiagnostics = null;
 
 // Keep the last slice of log in memory so a browser opening mid-session sees
 // context rather than an empty console.
@@ -68,7 +72,11 @@ async function currentStatus() {
     port: config.server.port,
     installed: isInstalled(config.installDir),
     ...readInstalledBuild(config.installDir || ''),
-    connection: connectionFacts(s)
+    connection: connectionFacts(s),
+    diagnostics: lastDiagnostics,
+    // The OS knows when the process really started, so an adopted server no
+    // longer has to report its uptime as unknown.
+    uptimeSeconds: lastDiagnostics?.uptimeSeconds ?? s.uptimeSeconds
   };
 }
 
@@ -176,7 +184,15 @@ app.delete('/api/players/:id', (req, res) => {
 });
 
 app.get('/api/worlds', (_req, res) => {
-  res.json({ worlds: listWorlds(worldsDir(config)), current: config.server.world });
+  const worlds = listWorlds(worldsDir(config));
+  res.json({
+    worlds,
+    current: config.server.world,
+    // Every remembered profile, not only the worlds already on disk: a world
+    // you configured but have not generated yet must still restore its own
+    // settings when you switch back to it.
+    profiles: config.worldProfiles ?? {}
+  });
 });
 
 app.get('/api/gameplay', (_req, res) => {
@@ -190,6 +206,7 @@ app.put('/api/config', wrap(async (req, res) => {
   const errors = validate(next);
   if (errors.length) return res.status(400).json({ errors });
   config = next;
+  config.worldProfiles = rememberProfile(config, next.server.world, next.server);
   saveConfig(config);
   hub.broadcast('status', await currentStatus());
   res.json(config);
@@ -261,6 +278,23 @@ const backupTimer = setInterval(async () => {
   if ((await proc.status()).running) await safeBackup('auto');
 }, Math.max(1, config.backupIntervalMinutes ?? 30) * 60_000);
 backupTimer.unref?.();
+
+const diagnosticsTimer = setInterval(async () => {
+  const s = await proc.status();
+  if (!s.running) {
+    if (lastDiagnostics) {
+      lastDiagnostics = null;
+      diagnostics.reset();
+    }
+    return;
+  }
+  const sample = await diagnostics.sample(s.pid);
+  if (sample) {
+    lastDiagnostics = sample;
+    hub.broadcast('diagnostics', sample);
+  }
+}, 4000);
+diagnosticsTimer.unref?.();
 
 // Status heartbeat to the browser.
 const statusTimer = setInterval(async () => {

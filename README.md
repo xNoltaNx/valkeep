@@ -3,7 +3,7 @@
 A LAN-only control panel for a Valheim dedicated server running on a home
 Windows PC. Start, stop, monitor, back up, and update the server from a browser.
 
-![The board](docs/runelive-desktop.png)
+![The board](docs/v5-desktop.png)
 
 ## Running it
 
@@ -74,6 +74,52 @@ individually overrides it. A modifier left on **Normal** is not passed at all,
 because omission is how Valheim expresses default. Values are validated before
 a start, since an invalid modifier makes the server fail to launch silently.
 
+## Players & access
+
+The **Players & access** section builds a roster from the log: connection lines
+carry the platform ID, character lines carry the name. Click a player for when
+they were first and last seen, how many sessions, and buttons that write
+Valheim three list files:
+
+| List | Effect |
+|---|---|
+| Admin | Grants the in-game console (F5): kick, ban, spawn, no-clip |
+| Banned | Blocked from the server |
+| Allowed | While anyone is on this list, **everyone not on it is blocked** |
+
+Writes preserve the file comment headers, including any you add yourself.
+Turning on the allowed list asks for confirmation, because a non-empty
+permittedlist silently locks out everyone else.
+
+**Names are inferred.** The ID and the name arrive on two unrelated log lines
+and are matched by order, which is right in the ordinary case and can mis-pair
+if two people join in the same instant. The panel labels them rather than
+presenting the pairing as fact.
+
+**Inventory, skills and position cannot be edited, by this panel or any other.**
+Valheim stores character data on each player own PC (`characters_local/*.fch`),
+not on the server, which is why your character follows you between servers. Only
+BepInEx mods that relocate characters server-side change this, and they require
+every player to install them.
+
+Whether banning someone **already connected** disconnects them immediately or
+only blocks their next join is not documented and has not been tested here.
+Restart the server if you need to be certain.
+
+## Diagnostics
+
+While the server runs, the header shows **CPU**, **memory** and **thread count**,
+sampled every four seconds from the operating system.
+
+CPU is a rate, not a total: Windows reports cumulative CPU seconds, so the panel
+takes two readings and divides by the elapsed time, normalised across all cores.
+The first tick reads "measuring" because a rate needs two samples. Uptime also
+comes from the real process start time, which is why a server the panel adopted
+still reports its true uptime.
+
+There is no per-player ping. Valheim does not log latency and there is no RCON
+to ask for it.
+
 ## Choosing a world
 
 The **World** dropdown lists every world already on this PC and offers
@@ -83,6 +129,13 @@ disk, but you spawning somewhere unfamiliar.
 
 Switching worlds asks for confirmation. Nothing is deleted; the previous world
 stays on disk and you can switch back.
+
+**Settings are remembered per world.** A world is a whole setup, not just a save
+file - the friends who play on it know it by a particular server name and
+password. Saving records the current settings against the current world, and
+selecting a world brings its own settings back, so you never hand out a password
+that belongs to a different world. A world you have not created yet inherits
+whatever is on screen.
 
 ## Backups
 
@@ -169,7 +222,7 @@ as "unknown", because the panel genuinely does not know when it started.
 
 ```bash
 npm install
-npm test        # 130 tests, node:test
+npm test        # 191 tests, node:test
 npm start
 ```
 
@@ -184,6 +237,10 @@ npm start
 | `src/settings.js` | Config validation, launch arguments |
 | `src/gameplay.js` | World modifier definitions and validation |
 | `src/worlds.js` | Discovers worlds on disk |
+| `src/access.js` | Admin, banned and allowed lists |
+| `src/roster.js` | Who has played, assembled from the log |
+| `src/diagnostics.js` | CPU, memory and true uptime |
+| `src/profiles.js` | Per-world settings profiles |
 | `src/hub.js` | SSE fan-out |
 
 Design documents: `PRODUCT.md` (product truth), `DESIGN.md` (the visual world),

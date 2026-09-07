@@ -18,6 +18,8 @@ const el = {
   logFilter: $('logFilter'), followLog: $('followLog'),
   dock: $('consoleDock'), dockGrip: $('dockGrip'), dockToggle: $('dockToggle'),
   dockBody: $('consoleBody'),
+  diagStrip: $('diagStrip'), diagCpu: $('diagCpu'),
+  diagMem: $('diagMem'), diagThreads: $('diagThreads'),
   accessRows: $('accessRows'), accessEmpty: $('accessEmpty'),
   knownCount: $('knownCount'), allowListWarning: $('allowListWarning'),
   connection: $('connection'), connectionText: $('connectionText'),
@@ -31,6 +33,7 @@ const el = {
 };
 
 let config = null;
+let worldProfiles = {};
 let lastState = null;
 const logLines = [];
 const LOG_MAX = 800;
@@ -157,12 +160,29 @@ function renderStatus(s) {
   renderPlayers(s);
 
   renderConnection(s);
+  renderDiagnostics(s);
 
   el.btnStart.disabled = s.running || !s.installed;
   el.btnStop.disabled = !s.running;
   el.btnRestart.disabled = !s.running;
   el.btnBackup.disabled = !s.installed;
   el.btnUpdate.disabled = s.running;
+}
+
+function renderDiagnostics(s) {
+  const d = s.diagnostics;
+  // Only shown while the server is up: stale numbers from a dead process would
+  // be worse than none.
+  el.diagStrip.hidden = !s.running || !d;
+  if (el.diagStrip.hidden) return;
+
+  // A single sample cannot give a rate, so the first tick honestly shows nothing.
+  el.diagCpu.textContent = d.cpuPercent === null ? 'measuring' : d.cpuPercent + '%';
+  el.diagCpu.dataset.load = (d.cpuPercent ?? 0) >= 80 ? 'high' : 'normal';
+  el.diagMem.textContent = d.memoryMB >= 1024
+    ? (d.memoryMB / 1024).toFixed(2) + ' GB'
+    : d.memoryMB + ' MB';
+  el.diagThreads.textContent = String(d.threads);
 }
 
 function renderConnection(s) {
@@ -359,10 +379,11 @@ el.logFilter.addEventListener('input', renderLog);
 const NEW_WORLD = ' new';
 
 async function loadWorlds() {
-  let data = { worlds: [], current: config?.server?.world ?? '' };
+  let data = { worlds: [], current: config?.server?.world ?? '', profiles: {} };
   try {
     data = await api('/api/worlds');
   } catch { /* keep the fallback */ }
+  worldProfiles = data.profiles ?? {};
 
   el.worldSelect.replaceChildren();
 
@@ -400,7 +421,42 @@ function syncWorldField() {
   if (creating) el.worldNew.focus();
 }
 
-el.worldSelect.addEventListener('change', syncWorldField);
+el.worldSelect.addEventListener('change', () => {
+  syncWorldField();
+  applyWorldProfile(el.worldSelect.value);
+});
+
+/*
+ * A world is a whole setup, not just a save file: the friends who play on it
+ * know it by a particular server name and password. Selecting a world brings
+ * its own settings back, so you never hand out a password that belongs to a
+ * different world. An unknown world keeps what is on screen, which is what you
+ * want when creating one.
+ */
+function applyWorldProfile(world) {
+  const profile = worldProfiles[world];
+  if (!profile) return;
+
+  if (profile.name !== undefined) $('f-name').value = profile.name;
+  if (profile.password !== undefined) $('f-password').value = profile.password;
+  if (profile.port !== undefined) $('f-port').value = profile.port;
+  if (profile.saveinterval !== undefined) $('f-saveinterval').value = profile.saveinterval;
+  if (profile.crossplay !== undefined) $('f-crossplay').checked = !!profile.crossplay;
+  if (profile.public !== undefined) $('f-public').checked = !!profile.public;
+
+  if (profile.preset !== undefined) {
+    el.preset.value = (profile.preset || 'normal').toLowerCase();
+    renderPresetNote();
+  }
+  for (const select of el.modifierFields.querySelectorAll('select')) {
+    select.value = (profile.modifiers ?? {})[select.dataset.modifier] ?? 'normal';
+  }
+  for (const input of el.toggleFields.querySelectorAll('input')) {
+    input.checked = (profile.setkeys ?? []).includes(input.dataset.toggle);
+  }
+
+  notice('Loaded the settings last used for "' + world + '".');
+}
 
 function chosenWorld() {
   return el.worldSelect.value === NEW_WORLD
@@ -847,6 +903,9 @@ function connect() {
   source.addEventListener('log', e => pushLog(JSON.parse(e.data).line));
   source.addEventListener('backups', () => loadBackups());
   source.addEventListener('players', () => loadPlayers());
+  source.addEventListener('diagnostics', e => {
+    if (lastState) renderDiagnostics({ ...lastState, running: true, diagnostics: JSON.parse(e.data) });
+  });
 
   source.addEventListener('progress', e => {
     const d = JSON.parse(e.data);
