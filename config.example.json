@@ -28,6 +28,7 @@
     "worldSaved": "World saved *\\( *(?<ms>[\\d.]+)ms *\\)",
     "joinCode": "Session \"(?<session>.*?)\" registered with join code (?<code>\\d+)",
     "heartbeat": "Session \"(?<session>.*?)\" with join code (?<code>\\d+).*? is active with (?<players>\\d+) player",
-    "sessionNew": "New session server \"(?<session>.*?)\" that has join code (?<code>\\d*), now (?<players>\\d+) player"
+    "sessionNew": "New session server \"(?<session>.*?)\" that has join code (?<code>\\d*), now (?<players>\\d+) player",
+    "publicAddress": "serverIP used to register the server: (?<address>[\\d.]+:\\d+)"
   }
 }

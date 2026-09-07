@@ -155,3 +155,13 @@ test('runs over a full real server log without throwing', () => {
   });
   assert.equal(p.snapshot().joinCode, '167812');
 });
+
+test('captures the public address the server reports for itself', () => {
+  const p = createParser(patterns);
+  p.feed('This is the serverIP used to register the server: 203.0.113.10:2456');
+  assert.equal(p.snapshot().publicAddress, '203.0.113.10:2456');
+});
+
+test('public address is null until the server reports one', () => {
+  assert.equal(createParser(patterns).snapshot().publicAddress, null);
+});

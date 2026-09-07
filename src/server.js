@@ -16,6 +16,8 @@ import { createHub } from './hub.js';
 import * as proc from './process.js';
 import * as backups from './backups.js';
 import { installOrUpdate, isInstalled, readInstalledBuild } from './steamcmd.js';
+import { listWorlds } from './worlds.js';
+import { MODIFIERS, TOGGLES, PRESETS } from './gameplay.js';
 
 if (!existsSync(configFile())) {
   copyFileSync(join(ROOT, 'config.example.json'), configFile());
@@ -58,7 +60,40 @@ async function currentStatus() {
     crossplay: !!config.server.crossplay,
     port: config.server.port,
     installed: isInstalled(config.installDir),
-    ...readInstalledBuild(config.installDir || '')
+    ...readInstalledBuild(config.installDir || ''),
+    connection: connectionFacts(s)
+  };
+}
+
+/**
+ * How friends actually get in. Everything here is read from the server's own
+ * log or config - nothing is probed, guessed, or sent to a third party.
+ */
+function connectionFacts(status) {
+  const snap = parser.snapshot();
+  if (!status.running) {
+    return { reachable: false, method: config.server.crossplay ? 'joincode' : 'direct', detail: 'Server is stopped.' };
+  }
+  if (config.server.crossplay) {
+    return snap.joinCode
+      ? {
+        reachable: true,
+        method: 'joincode',
+        detail: 'Registered with the crossplay relay. Friends join with the code - no port forwarding needed.',
+        publicAddress: snap.publicAddress ?? null
+      }
+      : {
+        reachable: false,
+        method: 'joincode',
+        detail: 'Waiting for the crossplay session to register.'
+      };
+  }
+  return {
+    reachable: null,
+    method: 'direct',
+    detail: 'Crossplay is off, so friends connect by IP. That needs UDP ' +
+      `${config.server.port}-${config.server.port + 1} forwarded to this PC.`,
+    publicAddress: snap.publicAddress ?? null
   };
 }
 
@@ -104,6 +139,14 @@ app.post('/api/server/restart', wrap(async (_req, res) => {
   hub.broadcast('status', await currentStatus());
   res.json({ pid });
 }));
+
+app.get('/api/worlds', (_req, res) => {
+  res.json({ worlds: listWorlds(worldsDir(config)), current: config.server.world });
+});
+
+app.get('/api/gameplay', (_req, res) => {
+  res.json({ modifiers: MODIFIERS, toggles: TOGGLES, presets: PRESETS });
+});
 
 app.get('/api/config', (_req, res) => res.json(config));
 

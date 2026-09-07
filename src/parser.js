@@ -33,6 +33,7 @@ export function createParser(patterns) {
     heartbeatSeq: -1,          // when that count arrived
     socketsSeq: -1,            // when socket bookkeeping last changed
     joinCode: null,
+    publicAddress: null,
     lastSaveAt: null
   };
 
@@ -90,6 +91,10 @@ export function createParser(patterns) {
           }
           break;
         }
+        case 'publicAddress': {
+          if (g.address) state.publicAddress = g.address;
+          break;
+        }
         case 'worldSaved': {
           state.lastSaveAt = Date.now();
           break;
@@ -128,6 +133,7 @@ export function createParser(patterns) {
       playerCountSource: source,
       openSockets: state.sockets.size,
       joinCode: state.joinCode,
+      publicAddress: state.publicAddress,
       lastSaveAt: state.lastSaveAt
     };
   }

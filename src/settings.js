@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { configFile, logsDir } from './paths.js';
+import { activeModifiers, validateGameplay } from './gameplay.js';
 
 export function loadConfig() {
   return JSON.parse(readFileSync(configFile(), 'utf8'));
@@ -23,6 +24,7 @@ export function validate(cfg) {
   if (s.password && s.name && s.password === s.name) {
     errors.push('Password must not be the same as the server name.');
   }
+  errors.push(...validateGameplay(s));
   return errors;
 }
 
@@ -47,7 +49,9 @@ export function buildArgs(cfg) {
   if (s.instanceid) args.push('-instanceid', String(s.instanceid));
   if (s.preset) args.push('-preset', String(s.preset));
 
-  for (const [key, value] of Object.entries(s.modifiers ?? {})) {
+  // A modifier set to "normal" is the game's default and is expressed by
+  // omitting the flag, not by passing it.
+  for (const [key, value] of activeModifiers(s.modifiers)) {
     args.push('-modifier', key, String(value));
   }
   for (const key of s.setkeys ?? []) {
