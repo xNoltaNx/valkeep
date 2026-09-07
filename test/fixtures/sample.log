@@ -1,0 +1,10 @@
+09/07/2026 10:00:01: Zonesystem Start 1
+09/07/2026 10:00:05: Session "TestServer" registered with join code 860226
+09/07/2026 10:00:30: Got handshake from client 76561198012345678
+09/07/2026 10:00:31: Got connection SteamID 76561198012345678
+09/07/2026 10:00:45: Got character ZDOID from Sigrun : 12345:1
+09/07/2026 10:01:00: Session "TestServer" with join code 860226 and IP 10.0.0.5:2456 is active with 1 player(s)
+09/07/2026 10:05:00: Got character ZDOID from Sigrun : 0:0
+09/07/2026 10:10:00: World saved ( 142.5ms )
+09/07/2026 10:15:00: Closing socket 76561198012345678
+09/07/2026 10:15:01: Session "TestServer" with join code 860226 and IP 10.0.0.5:2456 is active with 0 player(s)

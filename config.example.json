@@ -27,6 +27,7 @@
     "character": "Got character ZDOID from (?<name>.+?) : (?<zdo>-?\\d+):(?<rev>\\d+)",
     "worldSaved": "World saved *\\( *(?<ms>[\\d.]+)ms *\\)",
     "joinCode": "Session \"(?<session>.*?)\" registered with join code (?<code>\\d+)",
-    "heartbeat": "is active with (?<players>\\d+) player"
+    "heartbeat": "Session \"(?<session>.*?)\" with join code (?<code>\\d+).*? is active with (?<players>\\d+) player",
+    "sessionNew": "New session server \"(?<session>.*?)\" that has join code (?<code>\\d*), now (?<players>\\d+) player"
   }
 }
