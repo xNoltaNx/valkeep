@@ -158,6 +158,24 @@ organised:
 6. **Backups**.
 7. **Console** — docked, not in the flow.
 
+### Context
+
+Sections carry `data-when="running"`. A live server is the only state in which
+"who is connected" and "who may connect" mean anything, so when nothing is
+running those sections are absent rather than showing empty rows.
+
+Settings are treated differently on purpose, and this is a deliberate departure
+from "only show what applies". They stay reachable while the server runs,
+because staging a change for the next restart is a real thing to want — the
+host setting a new world name while friends are still playing. What changes is
+emphasis: the band reads "Takes effect on the next restart", and the section
+folds itself on the transition into running so it is out of the way without
+being gone. A deliberate toggle after that is never overridden.
+
+**Gameplay is nested inside World & server.** They are the same job —
+configuring a world before it starts — and as siblings they read as two
+unrelated tasks.
+
 ### Section bands
 
 One hairline between sections was not enough to parse at a glance. Each section

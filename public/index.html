@@ -89,7 +89,7 @@
 <main>
 
 <!-- 3. Connected -->
-<section class="board" data-biome="meadows" data-key="players">
+<section class="board" data-biome="meadows" data-key="players" data-when="running">
   <div class="board__head">
     <h2 class="board__title">
       <button class="board__toggle" type="button" aria-expanded="true" aria-controls="body-players">
@@ -107,7 +107,7 @@
 </section>
 
 <!-- 4. Players & access -->
-<section class="board" data-biome="plains" data-key="access">
+<section class="board" data-biome="plains" data-key="access" data-when="running">
   <div class="board__head">
     <h2 class="board__title">
       <button class="board__toggle" type="button" aria-expanded="true" aria-controls="body-access">
@@ -128,7 +128,7 @@
   </div>
 </section>
 
-<form id="settingsForm">
+<form id="settingsForm" autocomplete="off">
 
 <!-- 4. World & server -->
 <section class="board" data-biome="blackforest" data-key="world">
@@ -140,7 +140,7 @@
         <svg class="chev" aria-hidden="true"><use href="#i-collapse"></use></svg>
       </button>
     </h2>
-    <p class="board__meta">Applied on next start</p>
+    <p class="board__meta" id="worldMeta">Applied on next start</p>
   </div>
 
   <div class="board__body" id="body-world">
@@ -183,21 +183,17 @@
 
       <div class="field field--check field--wide">
         <label class="check">
-          <input type="checkbox" id="f-crossplay">
+          <input type="checkbox" id="f-crossplay" autocomplete="off">
           <span>Crossplay &mdash; PC, Xbox, PS5, Switch 2. Friends join by code, with no port forwarding.</span>
         </label>
         <label class="check">
-          <input type="checkbox" id="f-public">
+          <input type="checkbox" id="f-public" autocomplete="off">
           <span>List publicly in the server browser</span>
         </label>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- 5. Gameplay -->
-<section class="board" data-biome="ashlands" data-key="gameplay">
-  <div class="board__head">
+  <section class="subboard" data-biome="ashlands" data-key="gameplay">
+  <div class="subboard__head">
     <h2 class="board__title">
       <button class="board__toggle" type="button" aria-expanded="true" aria-controls="body-gameplay">
         <svg class="biome" aria-hidden="true"><use href="#b-ashlands"></use></svg>
@@ -230,6 +226,10 @@
     </div>
   </div>
 </section>
+  </div>
+</section>
+
+<!-- 5. Gameplay -->
 
 </form>
 

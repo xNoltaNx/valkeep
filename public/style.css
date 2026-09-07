@@ -437,6 +437,41 @@ form:first-of-type > .board:first-child { border-top: 0; box-shadow: none; }
 
 .board__body { background: var(--stone); }
 
+/*
+  A nested section. Gameplay lives inside World & server because it is the same
+  job - configuring a world before it starts - and two sibling settings panels
+  read as two unrelated tasks. Its band is inset and quieter so the nesting is
+  legible without a second visual language.
+*/
+.subboard {
+  margin: 0 0 4px;
+  border-top: 1px solid var(--carve-dark);
+  box-shadow: inset 0 1px 0 var(--carve-lit);
+}
+
+.subboard__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-right: var(--pad);
+  padding-left: 14px;
+  background: color-mix(in srgb, var(--stone-raised) 55%, var(--stone));
+}
+.subboard__head .board__toggle { min-height: 46px; font-size: var(--t-row); }
+.subboard__head .board__toggle .biome { width: 16px; height: 16px; }
+.subboard[data-biome="ashlands"] .board__toggle .biome { color: var(--ember); }
+.subboard .settings { padding-left: calc(var(--pad) + 14px); }
+
+/* A section that does not apply in the current state is not dimmed or
+   disabled - it is simply not there. */
+.board[hidden], .subboard[hidden] { display: none !important; }
+
+/* While the server runs, settings still work but take effect later. Saying so
+   on the band is better than hiding a section someone may want to stage. */
+.board__meta[data-deferred="true"] { color: var(--ember); }
+
 .rows { list-style: none; margin: 0; padding: 0; }
 
 .rows li {

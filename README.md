@@ -3,7 +3,7 @@
 A LAN-only control panel for a Valheim dedicated server running on a home
 Windows PC. Start, stop, monitor, back up, and update the server from a browser.
 
-![The board](docs/type-desktop.png)
+![The board](docs/final-desktop.png)
 
 ## Running it
 
@@ -59,6 +59,20 @@ by someone who can already send HTTP to the panel — which, under the LAN-only
 threat model above, is someone already inside your network. Fixing them requires
 migrating to Express 5. Worth doing eventually; not worth doing the week of a
 launch.
+
+## What the panel shows when
+
+The page changes with the server. **Connected** and **Players & access** only
+exist while a server is running - when nothing is up there is nothing to show,
+so they are absent rather than empty.
+
+**Gameplay** is nested inside **World & server**, since both configure a world
+before it starts.
+
+Settings stay reachable while the server runs, because staging a change for the
+next restart is a normal thing to do. The band says "Takes effect on the next
+restart", and the section folds itself when the server starts. Open it again and
+it stays open.
 
 ## Gameplay settings
 

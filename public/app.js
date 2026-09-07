@@ -162,6 +162,7 @@ function renderStatus(s) {
 
   renderConnection(s);
   renderDiagnostics(s);
+  applyContext(!!s.running);
 
   el.btnStart.disabled = s.running || !s.installed;
   el.btnStop.disabled = !s.running;
@@ -377,7 +378,7 @@ el.logFilter.addEventListener('input', renderLog);
 
 /* ---------- settings ---------- */
 
-const NEW_WORLD = ' new';
+const NEW_WORLD = '__new-world__';
 
 async function loadWorlds() {
   let data = { worlds: [], current: config?.server?.world ?? '', profiles: {} };
@@ -535,6 +536,7 @@ function renderPresetNote() {
 
 function fillSettings(cfg) {
   config = cfg;
+  formDirty = false;
   $('f-name').value = cfg.server.name ?? '';
   $('f-password').value = cfg.server.password ?? '';
   $('f-port').value = cfg.server.port ?? 2456;
@@ -602,7 +604,10 @@ el.settingsForm.addEventListener('submit', async event => {
     const saved = await api('/api/config', { method: 'PUT', body: JSON.stringify({ server }) });
     fillSettings(saved);
     await loadWorlds();
-    notice('Settings saved. They apply the next time the server starts.');
+    markClean();
+    notice(lastState?.running
+      ? 'Settings saved. They take effect the next time the server restarts.'
+      : 'Settings saved. They apply when you start the server.');
   } catch (err) {
     el.settingsErrors.textContent = err.message;
   }
@@ -809,7 +814,7 @@ function setSectionOpen(section, open) {
   store.set(`section:${section.dataset.key}`, open ? 'open' : 'closed');
 }
 
-for (const section of document.querySelectorAll('.board[data-key]')) {
+for (const section of document.querySelectorAll('.board[data-key], .subboard[data-key]')) {
   const toggle = section.querySelector('.board__toggle');
   setSectionOpen(section, store.get(`section:${section.dataset.key}`, 'open') === 'open');
   toggle.addEventListener('click', () => {
@@ -894,6 +899,88 @@ window.addEventListener('resize', () => {
 if (typeof ResizeObserver === 'function') {
   new ResizeObserver(syncDockReserve).observe(el.dock);
 }
+
+
+/* ---------- context: show what applies to the current state ---------- */
+
+/*
+ * Sections carry data-when="running". A live server is the only state in which
+ * "who is connected" and "who may connect" mean anything, so when nothing is
+ * running those sections are absent rather than showing empty rows.
+ *
+ * Settings are treated differently on purpose. They stay reachable while the
+ * server runs, because staging a change for the next restart is a real thing
+ * to want - the host setting Wednesday's world name while friends are still
+ * playing. What changes is emphasis: the band says the change is deferred, and
+ * the section folds itself away on the transition into running so it is out of
+ * the way without being gone.
+ */
+let contextState = null;
+
+function applyContext(running) {
+  for (const section of document.querySelectorAll('[data-when]')) {
+    const wants = section.dataset.when === 'running';
+    section.hidden = wants !== running;
+  }
+
+  const meta = $('worldMeta');
+  if (meta) {
+    meta.dataset.deferred = String(running);
+    meta.textContent = running
+      ? 'Takes effect on the next restart'
+      : 'Applied when you start the server';
+  }
+
+  // Fold the setup sections when the server is running and unfold them when it
+  // is not - on first render and on every transition, but never in between. A
+  // deliberate toggle afterwards is the operator's call and must not be
+  // overridden every five seconds by the status heartbeat.
+  if (contextState !== running) {
+    for (const key of ['world', 'gameplay']) {
+      const section = document.querySelector(`[data-key="${key}"]`);
+      if (section) setSectionOpen(section, !running);
+    }
+  }
+  contextState = running;
+}
+
+/* ---------- keep the form honest ---------- */
+
+/*
+ * A checkbox was reported as switching itself on. The stored value was never
+ * wrong, so this is the control drifting from the truth rather than the truth
+ * changing - browser form restoration on reload is the usual cause, and it is
+ * exactly the kind of thing that is invisible until someone hits Save.
+ *
+ * Rather than guess at the cause, the form now re-syncs from the server
+ * whenever the operator is not mid-edit. Any drift, from any cause, corrects
+ * itself instead of waiting to be saved by mistake.
+ */
+let formDirty = false;
+
+function markClean() { formDirty = false; }
+
+document.getElementById('settingsForm')?.addEventListener('input', () => { formDirty = true; });
+document.getElementById('settingsForm')?.addEventListener('change', () => { formDirty = true; });
+
+async function resyncSettings({ force = false } = {}) {
+  if (formDirty && !force) return;
+  try {
+    const cfg = await api('/api/config');
+    fillSettings(cfg);
+    await loadWorlds();
+    markClean();
+  } catch { /* the panel is unreachable; the next tick will retry */ }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) resyncSettings();
+});
+window.addEventListener('pageshow', event => {
+  // A back/forward restore is precisely when a browser reinstates old control
+  // state, so re-assert the stored values.
+  if (event.persisted) resyncSettings({ force: true });
+});
 
 /* ---------- live stream ---------- */
 
