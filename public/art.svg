@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <!--
+    Authored original artwork. Nothing here is extracted, traced, or derived
+    from Iron Gate's assets.
+
+    The serpent band follows real Viking-age runestone construction: a winding
+    ribbon whose body would hold the inscription, head and tail meeting at one
+    end, with a carved inner channel running its length. It is structure, not
+    ornament - which is why it earns its place on an Operate surface.
+  -->
+
+  <symbol id="a-serpent" viewBox="0 0 1200 60" preserveAspectRatio="none">
+    <!-- Outer body: one continuous winding ribbon. -->
+    <path d="M14 30
+             C 14 12, 46 12, 62 22
+             S 110 48, 150 38
+             S 214 10, 262 20
+             S 330 46, 382 36
+             S 452 12, 508 22
+             S 580 48, 638 38
+             S 712 12, 772 22
+             S 848 48, 910 38
+             S 990 12, 1054 22
+             S 1130 44, 1174 32"
+          fill="none" stroke="currentColor" stroke-width="9"
+          stroke-linecap="round" opacity="0.55"/>
+    <!-- Carved inner channel: the cut that makes the body read as stone. -->
+    <path d="M14 30
+             C 14 12, 46 12, 62 22
+             S 110 48, 150 38
+             S 214 10, 262 20
+             S 330 46, 382 36
+             S 452 12, 508 22
+             S 580 48, 638 38
+             S 712 12, 772 22
+             S 848 48, 910 38
+             S 990 12, 1054 22
+             S 1130 44, 1174 32"
+          fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" opacity="0.28"/>
+    <!-- Head, where the band terminates. -->
+    <path d="M1174 32 l22 -9 -4 9 4 9 z" fill="currentColor" opacity="0.55"/>
+    <!-- Tail knot. -->
+    <circle cx="14" cy="30" r="5" fill="none" stroke="currentColor"
+            stroke-width="3.5" opacity="0.55"/>
+  </symbol>
+
+  <!--
+    Biome marks. Eight carved glyphs, one per Valheim biome, on a 24px grid
+    with a single stroke weight. Drawn as landform abstractions, not icons of
+    objects: meadow horizon, forest crowns, swamp water line, mountain peaks,
+    plains grass, mist banks, ash fissure, north ice.
+  -->
+  <symbol id="b-meadows" viewBox="0 0 24 24">
+    <path d="M3 17h18" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M7 17c0-3 2-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="1.75" fill="none"/>
+  </symbol>
+
+  <symbol id="b-blackforest" viewBox="0 0 24 24">
+    <path d="M6 18 12 6l6 12z" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M8.5 13h7" stroke="currentColor" stroke-width="1.75" fill="none"/>
+  </symbol>
+
+  <symbol id="b-swamp" viewBox="0 0 24 24">
+    <path d="M3 15c3-2 5 2 8 0s5 2 8 0" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M3 19c3-2 5 2 8 0s5 2 8 0" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M12 12V5" stroke="currentColor" stroke-width="1.75" fill="none"/>
+  </symbol>
+
+  <symbol id="b-mountain" viewBox="0 0 24 24">
+    <path d="M3 19 10 7l4 6 3-4 4 10z" stroke="currentColor" stroke-width="1.75" fill="none"/>
+  </symbol>
+
+  <symbol id="b-plains" viewBox="0 0 24 24">
+    <path d="M5 20V11" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M12 20V7" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M19 20v-9" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M3 20h18" stroke="currentColor" stroke-width="1.75" fill="none"/>
+  </symbol>
+
+  <symbol id="b-mistlands" viewBox="0 0 24 24">
+    <path d="M4 9h11" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M8 13h12" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M4 17h11" stroke="currentColor" stroke-width="1.75" fill="none"/>
+  </symbol>
+
+  <symbol id="b-ashlands" viewBox="0 0 24 24">
+    <path d="M3 20h18" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M12 16V5" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M8 11 12 5l4 6" stroke="currentColor" stroke-width="1.75" fill="none"/>
+  </symbol>
+
+  <symbol id="b-deepnorth" viewBox="0 0 24 24">
+    <path d="M12 4v16" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M5 8l14 8" stroke="currentColor" stroke-width="1.75" fill="none"/>
+    <path d="M19 8 5 16" stroke="currentColor" stroke-width="1.75" fill="none"/>
+  </symbol>
+</svg>

@@ -28,6 +28,36 @@ async function defaultTasklist(pid) {
   return stdout;
 }
 
+async function defaultImageList() {
+  const { stdout } = await execFileAsync(
+    'tasklist', ['/FI', `IMAGENAME eq ${IMAGE}`, '/FO', 'CSV', '/NH']
+  );
+  return stdout;
+}
+
+/**
+ * Every running Valheim server on this machine, whether or not we started it.
+ *
+ * Without this the panel only ever knew about its own recorded pid, so a
+ * server left behind by a previous panel session was invisible: status said
+ * "stopped" while players were connected, and Start would launch a second
+ * server that instantly died on the already-bound port while reporting
+ * success.
+ */
+export async function findServerPids(runImageList = defaultImageList) {
+  try {
+    const out = await runImageList();
+    return out.split(/\r?\n/)
+      .filter(l => l.trim().startsWith('"'))
+      .map(l => l.split('","'))
+      .filter(cols => cols[0].replace(/^"/, '').toLowerCase() === IMAGE)
+      .map(cols => Number(cols[1]))
+      .filter(Number.isFinite);
+  } catch {
+    return [];
+  }
+}
+
 /**
  * True only when the pid is alive AND is actually the Valheim server.
  * Windows recycles pids; without the image check the panel could report a
@@ -67,25 +97,44 @@ export function clearState() {
   }
 }
 
-export async function status({ runTasklist } = {}) {
+export async function status({ runTasklist, runImageList } = {}) {
   const state = readState();
-  const stopped = { running: false, pid: null, startedAt: null, uptimeSeconds: 0 };
-  if (!state?.pid) return stopped;
+  const stopped = { running: false, pid: null, startedAt: null, uptimeSeconds: 0, adopted: false };
 
-  if (!(await isValheimPid(state.pid, runTasklist))) {
-    clearState();   // stale state from a crash or an external kill
-    return stopped;
+  if (state?.pid && await isValheimPid(state.pid, runTasklist)) {
+    return {
+      running: true,
+      pid: state.pid,
+      startedAt: state.startedAt,
+      world: state.world ?? null,
+      adopted: !!state.adopted,
+      uptimeSeconds: state.startedAt
+        ? Math.floor((Date.now() - state.startedAt) / 1000)
+        : 0
+    };
   }
-  return {
-    running: true,
-    pid: state.pid,
-    startedAt: state.startedAt,
-    world: state.world ?? null,
-    uptimeSeconds: Math.floor((Date.now() - state.startedAt) / 1000)
-  };
+
+  if (state?.pid) clearState();   // stale state from a crash or external kill
+
+  // Adopt a server we did not start: a leftover from a previous panel session
+  // is still the real server, and pretending otherwise is worse than adopting.
+  const found = await findServerPids(runImageList);
+  if (found.length === 1) {
+    const pid = found[0];
+    writeState({ pid, startedAt: null, world: null, adopted: true });
+    return { running: true, pid, startedAt: null, world: null, adopted: true, uptimeSeconds: 0 };
+  }
+  return stopped;
 }
 
 export async function start(cfg) {
+  const already = await findServerPids();
+  if (already.length > 0) {
+    throw new Error(
+      `A Valheim server is already running (pid ${already.join(', ')}). ` +
+      `Stop it before starting another - a second server cannot bind the same port.`
+    );
+  }
   mkdirSync(logsDir(), { recursive: true });
   const child = spawn(cfg.serverExe, buildArgs(cfg), {
     detached: true,

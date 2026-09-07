@@ -3,7 +3,7 @@
 A LAN-only control panel for a Valheim dedicated server running on a home
 Windows PC. Start, stop, monitor, back up, and update the server from a browser.
 
-![The board](docs/live-desktop.png)
+![The board](docs/runelive-desktop.png)
 
 ## Running it
 
@@ -25,6 +25,21 @@ From another device on the same network, use this PC's LAN address, for example
 5. The **join code** appears in the header once the crossplay session registers.
    Send it to your friends. It changes every restart.
 
+## How friends connect
+
+**With crossplay on you do not need port forwarding.** Valheim registers the
+server with the PlayFab relay and friends join with the join code, over the
+internet, with nothing exposed on your router. The Connection line under the
+header says whether that registration actually happened.
+
+Everything on that line is read from the server's own log. Nothing is probed,
+and your address is never sent to a third party to test reachability - that
+would require an external service, and the panel does not do it silently.
+
+If you turn crossplay **off**, friends connect by IP instead, and that does need
+UDP 2456-2457 forwarded to this PC. The panel then shows the public address
+Valheim reported for itself.
+
 ## Security
 
 **This panel has no authentication and is meant for your LAN only.** Anyone who
@@ -38,6 +53,36 @@ by someone who can already send HTTP to the panel — which, under the LAN-only
 threat model above, is someone already inside your network. Fixing them requires
 migrating to Express 5. Worth doing eventually; not worth doing the week of a
 launch.
+
+## Gameplay settings
+
+The **Gameplay** section exposes every world modifier Valheim supports:
+
+| Modifier | Values | Controls |
+|---|---|---|
+| Combat | veryeasy, easy, normal, hard, veryhard | enemy health, damage, spawn rates |
+| Death penalty | casual, veryeasy, easy, normal, hard, hardcore | skill progress lost on death |
+| Resources | muchless, less, normal, more, muchmore, most | yield from trees, rocks, ore |
+| Raids | none, muchless, less, normal, more, muchmore | how often events attack your base |
+| Portals | casual, normal, hard, veryhard | what portals will carry |
+
+Plus four toggles - no build cost, player events, passive creatures, no map -
+and seven presets: Normal, Casual, Easy, Hard, Hardcore, Immersive, Hammer.
+
+A preset sets the baseline and the game resolves it; anything you set
+individually overrides it. A modifier left on **Normal** is not passed at all,
+because omission is how Valheim expresses default. Values are validated before
+a start, since an invalid modifier makes the server fail to launch silently.
+
+## Choosing a world
+
+The **World** dropdown lists every world already on this PC and offers
+"Create a new world". This exists because the field used to be free text, and a
+typo there silently generated a brand-new empty world - the old one still on
+disk, but you spawning somewhere unfamiliar.
+
+Switching worlds asks for confirmation. Nothing is deleted; the previous world
+stays on disk and you can switch back.
 
 ## Backups
 
@@ -113,11 +158,18 @@ measurements.
 Status checks verify both that the recorded PID is alive **and** that it is
 actually `valheim_server.exe`, because Windows recycles PIDs.
 
+If a server is running that the panel did not start - left behind by a previous
+panel session - the panel **adopts** it rather than reporting "stopped". Before
+this existed, an orphan was invisible: status showed stopped while players were
+connected, and Start would launch a second server that died instantly on the
+already-bound port while reporting success. An adopted server shows its uptime
+as "unknown", because the panel genuinely does not know when it started.
+
 ## Development
 
 ```bash
 npm install
-npm test        # 94 tests, node:test
+npm test        # 130 tests, node:test
 npm start
 ```
 
@@ -130,6 +182,8 @@ npm start
 | `src/backups.js` | Snapshot, restore, prune |
 | `src/steamcmd.js` | Install and update |
 | `src/settings.js` | Config validation, launch arguments |
+| `src/gameplay.js` | World modifier definitions and validation |
+| `src/worlds.js` | Discovers worlds on disk |
 | `src/hub.js` | SSE fan-out |
 
 Design documents: `PRODUCT.md` (product truth), `DESIGN.md` (the visual world),

@@ -1,39 +1,66 @@
 /*
   Valheim Server Board
-  World: Scandinavian transit departure board. See DESIGN.md.
-  Deep signage blue, signage white, amber for live values, one ruled grid.
+  World: a carved runestone. See DESIGN.md.
+
+  Every rule on this page is a carved channel - dark line above, lit line
+  below - never a plain border. That single device is what makes the surface
+  read as stone rather than as a dark dashboard.
 */
 
 @font-face {
-  font-family: 'Archivo';
-  src: url('/fonts/archivo-latin.woff2') format('woff2');
-  font-weight: 100 900;
+  font-family: 'Cinzel';
+  src: url('/fonts/cinzel.woff2') format('woff2');
+  font-weight: 400 700;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Martian Mono';
-  src: url('/fonts/martianmono-latin.woff2') format('woff2');
-  font-weight: 100 800;
+  font-family: 'Alegreya Sans';
+  src: url('/fonts/alegreyasans-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Alegreya Sans';
+  src: url('/fonts/alegreyasans-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('/fonts/plexmono-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('/fonts/plexmono-500.woff2') format('woff2');
+  font-weight: 500;
   font-display: swap;
 }
 
 :root {
-  --board: #0a1628;
-  --board-raised: #122238;
-  --rule: #1f3550;
-  --rule-strong: #2c4a6e;
-  /* Disabled controls must still be readable: 4.58:1 on the board ground.
-     A disabled button nobody can read is a legibility bug, not a state. */
-  --disabled: #6b829d;
-  --signage: #f2f5f8;
-  --signage-dim: #9fb2c9;
-  --amber: #ffb02e;
-  --running: #4ade80;
-  --stopped: #f87171;
-  --notice: #ff8a3d;
+  --stone: #14120f;
+  --stone-raised: #1e1b16;
+  --carve-dark: #0a0908;
+  --carve-lit: #3a342a;
 
-  --sans: 'Archivo', system-ui, sans-serif;
-  --mono: 'Martian Mono', ui-monospace, monospace;
+  --bone: #e8e0d0;
+  --bone-dim: #a89e88;
+  --bronze: #d0a758;
+
+  --moss: #8fbc5a;
+  --blood: #e0645a;
+  --frost: #a8cee0;
+  --ember: #e0742f;
+
+  /* Disabled controls stay readable on the raised panel they actually sit on
+     (4.91:1), not just on the stone. A control nobody can read is a
+     legibility bug, not a state. */
+  --disabled: #918879;
+
+  --display: 'Cinzel', Georgia, serif;
+  --sans: 'Alegreya Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   --gap: 20px;
   --pad: clamp(16px, 4vw, 40px);
@@ -41,19 +68,42 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { background: var(--board); }
+/* display:flex/grid on a component beats the UA [hidden] rule, so hiding an
+   element from script silently does nothing. Settle it once, globally. */
+[hidden] { display: none !important; }
+
+html { background: var(--stone); }
 
 body {
   margin: 0;
-  background: var(--board);
-  color: var(--signage);
+  color: var(--bone);
   font-family: var(--sans);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 13.5px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+
+  /* Fog: Valheim's signature is atmospheric depth, so the ground lightens
+     toward the top rather than sitting flat. No shadow anywhere on this page. */
+  background-color: var(--stone);
+  background-image: linear-gradient(180deg, #1a1713 0%, var(--stone) 480px);
+  background-repeat: no-repeat;
 }
 
-h1, h2 { margin: 0; font-weight: 800; letter-spacing: -0.02em; }
+/* Stone grain: one tiled turbulence, barely there. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body > * { position: relative; z-index: 1; }
+
+h1, h2 { margin: 0; font-weight: 700; }
 p { margin: 0; }
 
 .visually-hidden {
@@ -64,119 +114,158 @@ p { margin: 0; }
 
 .data { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
-/* Caps rule label: the board's section marker. */
+/* Section markers are inscription, so they are set in carved capitals with
+   open tracking rather than crowded. */
 .rule-label {
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--display);
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--signage-dim);
+  color: var(--bone-dim);
 }
+.rule-label .biome { width: 15px; height: 15px; flex: none; }
 
-.ico {
-  width: 18px; height: 18px;
-  flex: none;
+.ico { width: 18px; height: 18px; flex: none; display: block; }
+
+/* ---------- Serpent band ---------- */
+
+.serpent {
   display: block;
+  width: 100%;
+  height: 34px;
+  color: var(--bronze);
+  opacity: 0.5;
 }
 
-/* ---------- Board head ---------- */
+/* ---------- Stone head ---------- */
 
-.board-head {
+.stone-head {
+  padding: 10px var(--pad) clamp(20px, 3.5vw, 32px);
+  border-bottom: 1px solid var(--carve-dark);
+  box-shadow: inset 0 -1px 0 var(--carve-lit);
+}
+
+.head-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.85fr) minmax(0, 1.15fr);
   gap: var(--gap);
   align-items: start;
-  padding: clamp(20px, 4vw, 36px) var(--pad);
-  border-bottom: 2px solid var(--rule);
-  background: var(--board-raised);
-}
-
-.board-head__service h1 {
-  font-size: clamp(24px, 4vw, 34px);
   margin-top: 6px;
-  line-height: 1.1;
 }
 
-.board-head__world,
-.board-head__uptime {
+.stone-head h1 {
   margin-top: 8px;
-  color: var(--signage-dim);
-  font-size: 12px;
+  font-family: var(--display);
+  font-size: clamp(23px, 3.6vw, 33px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  color: var(--bone);
 }
 
-.board-head__world .sep { padding: 0 6px; color: var(--rule); }
+.head__world,
+.head__uptime {
+  margin-top: 9px;
+  color: var(--bone-dim);
+  font-size: 12.5px;
+}
+.head__world .sep { padding: 0 7px; color: var(--carve-lit); }
 
 .plate {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 6px;
-  padding: 8px 14px 8px 12px;
-  border: 1px solid var(--rule);
-  background: var(--board);
-  font-size: clamp(20px, 3.4vw, 30px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  gap: 11px;
+  margin-top: 8px;
+  padding: 9px 16px;
+  background: var(--stone);
+  border-top: 1px solid var(--carve-dark);
+  border-bottom: 1px solid var(--carve-lit);
+  border-left: 1px solid var(--carve-dark);
+  border-right: 1px solid var(--carve-lit);
+  font-family: var(--display);
+  font-size: clamp(19px, 3vw, 28px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
 }
 
-.plate__dot {
-  width: 13px; height: 13px;
+.plate__mark {
+  width: 12px; height: 12px;
   border: 2px solid currentColor;
-  border-radius: 50%;
+  transform: rotate(45deg);
 }
 
-/* State is carried by the word and the dot fill first, colour third. */
-.plate[data-state="running"] { color: var(--running); }
-.plate[data-state="running"] .plate__dot { background: currentColor; }
-.plate[data-state="stopped"] { color: var(--stopped); }
-.plate[data-state="stopped"] .plate__dot { background: transparent; }
-.plate[data-state="working"] { color: var(--amber); }
-.plate[data-state="working"] .plate__dot {
-  background: repeating-linear-gradient(45deg, currentColor 0 3px, transparent 3px 6px);
-}
-.plate[data-state="unknown"] { color: var(--signage-dim); }
+.plate[data-state="running"] { color: var(--moss); }
+.plate[data-state="running"] .plate__mark { background: currentColor; }
+.plate[data-state="stopped"] { color: var(--blood); }
+.plate[data-state="stopped"] .plate__mark { background: transparent; }
+.plate[data-state="unknown"] { color: var(--bone-dim); }
 
 .joincode {
+  margin-top: 6px;
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
-  font-size: clamp(34px, 7vw, 60px);
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: clamp(33px, 6.6vw, 60px);
+  font-weight: 500;
+  letter-spacing: 0.06em;
   line-height: 1.05;
-  color: var(--amber);
-  margin-top: 4px;
+  color: var(--bronze);
 }
 .joincode[data-empty="true"] {
-  font-size: clamp(17px, 2.4vw, 22px);
+  font-family: var(--sans);
+  font-size: clamp(16px, 2.2vw, 20px);
   font-weight: 400;
-  letter-spacing: 0.02em;
-  color: var(--signage-dim);
+  letter-spacing: 0;
+  color: var(--bone-dim);
 }
 
-.board-head__hint {
+.head__hint {
   margin-top: 10px;
   max-width: 46ch;
-  color: var(--signage-dim);
-  font-size: 12px;
+  color: var(--bone-dim);
+  font-size: 12.5px;
 }
 
 .linkbtn {
-  margin-top: 8px;
+  margin-top: 9px;
   padding: 0;
   border: 0;
   background: none;
-  color: var(--signage);
-  font: inherit;
-  font-size: 12px;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   text-decoration: underline;
-  text-underline-offset: 4px;
+  text-underline-offset: 5px;
   cursor: pointer;
 }
-.linkbtn:hover { color: var(--amber); }
+.linkbtn:hover { color: var(--bronze); }
+
+/* ---------- Connection ---------- */
+
+.connection {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px var(--pad);
+  border-bottom: 1px solid var(--carve-dark);
+  box-shadow: inset 0 -1px 0 var(--carve-lit);
+  font-size: 13px;
+  color: var(--bone-dim);
+}
+.connection__mark { width: 16px; height: 16px; flex: none; margin-top: 3px; }
+.connection[data-reachable="true"] .connection__mark { color: var(--moss); }
+.connection[data-reachable="false"] .connection__mark { color: var(--bone-dim); }
+.connection[data-reachable="null"] .connection__mark { color: var(--ember); }
+.connection b { color: var(--bone); font-weight: 700; }
+.connection .data { color: var(--bone); }
 
 /* ---------- Notices ---------- */
 
@@ -185,50 +274,52 @@ p { margin: 0; }
   gap: 12px;
   align-items: flex-start;
   padding: 12px var(--pad);
-  border-bottom: 1px solid var(--rule);
-  background: color-mix(in srgb, var(--notice) 14%, var(--board));
-  color: var(--signage);
+  border-bottom: 1px solid var(--carve-dark);
+  box-shadow: inset 0 -1px 0 var(--carve-lit);
+  background: color-mix(in srgb, var(--ember) 11%, var(--stone));
+  color: var(--bone);
   font-size: 13px;
 }
-.notice .ico { color: var(--notice); margin-top: 1px; }
+.notice .ico { color: var(--ember); margin-top: 1px; }
 
 /* ---------- Action rail ---------- */
 
 .rail {
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
-  border-bottom: 2px solid var(--rule);
-  background: var(--board);
+  border-bottom: 1px solid var(--carve-dark);
+  box-shadow: inset 0 -1px 0 var(--carve-lit);
+  background: var(--stone-raised);
 }
 
 .rail__btn {
   display: flex;
   align-items: center;
-  gap: 9px;
-  min-height: 52px;
-  padding: 0 clamp(14px, 2.4vw, 22px);
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 clamp(15px, 2.4vw, 24px);
   border: 0;
-  border-right: 1px solid var(--rule);
+  border-right: 1px solid var(--carve-dark);
   background: none;
-  color: var(--signage);
-  font-family: var(--sans);
-  font-size: 12px;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms;
+  transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1), color 150ms;
 }
-.rail__btn:hover:not(:disabled) { background: var(--board-raised); color: var(--amber); }
+.rail__btn:hover:not(:disabled) { background: var(--stone); color: var(--bronze); }
 .rail__btn:disabled { color: var(--disabled); cursor: not-allowed; }
-.rail__btn--wide { margin-left: auto; border-right: 0; border-left: 1px solid var(--rule); }
+.rail__btn--wide { margin-left: auto; border-right: 0; border-left: 1px solid var(--carve-dark); }
 
 /* ---------- Sections ---------- */
 
-main { padding-bottom: 8px; }
-
-.board { border-bottom: 1px solid var(--rule); }
+.board {
+  border-bottom: 1px solid var(--carve-dark);
+  box-shadow: inset 0 -1px 0 var(--carve-lit);
+}
 
 .board__head {
   display: flex;
@@ -236,12 +327,11 @@ main { padding-bottom: 8px; }
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 22px var(--pad) 10px;
+  padding: 24px var(--pad) 11px;
 }
 
-.board__meta { color: var(--signage-dim); font-size: 12px; }
-.board__meta .data { color: var(--signage); }
-
+.board__meta { color: var(--bone-dim); font-size: 12.5px; }
+.board__meta .data { color: var(--bone); }
 .board__tools { display: flex; align-items: center; gap: 16px; }
 
 .rows { list-style: none; margin: 0; padding: 0; }
@@ -250,38 +340,39 @@ main { padding-bottom: 8px; }
   display: grid;
   align-items: center;
   gap: 16px;
-  padding: 11px var(--pad);
-  border-top: 1px solid var(--rule);
+  padding: 12px var(--pad);
+  border-top: 1px solid var(--carve-dark);
+  box-shadow: inset 0 1px 0 var(--carve-lit);
 }
 
-.rows--players li { grid-template-columns: 22px 1fr auto; }
-.rows--players .idx { color: var(--signage-dim); font-size: 12px; }
-.rows--players .who { font-weight: 600; font-size: 15px; }
+.rows--players li { grid-template-columns: 26px 1fr auto; }
+.rows--players .idx { color: var(--bone-dim); font-size: 12px; }
+.rows--players .who { font-weight: 700; font-size: 15px; }
 .rows--players .tag {
-  color: var(--signage-dim);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  color: var(--bone-dim);
+  font-family: var(--display);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .rows--backups li { grid-template-columns: 1fr auto auto; }
 .rows--backups .when { font-family: var(--mono); font-size: 13px; }
-.rows--backups .size { color: var(--signage-dim); font-family: var(--mono); font-size: 12px; }
+.rows--backups .size { color: var(--bone-dim); font-family: var(--mono); font-size: 12px; }
 .rows--backups .label {
   display: inline-block;
   margin-left: 10px;
-  padding: 1px 7px;
-  border: 1px solid var(--rule);
-  color: var(--signage-dim);
+  padding: 2px 8px;
+  border-top: 1px solid var(--carve-dark);
+  border-bottom: 1px solid var(--carve-lit);
+  color: var(--bone-dim);
+  font-family: var(--display);
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
 }
 
-.empty {
-  padding: 4px var(--pad) 22px;
-  color: var(--signage-dim);
-}
+.empty { padding: 4px var(--pad) 24px; color: var(--bone-dim); }
 
 /* ---------- Console ---------- */
 
@@ -289,55 +380,70 @@ main { padding-bottom: 8px; }
 
 .console {
   margin: 0;
-  padding: 14px var(--pad) 22px;
+  padding: 14px var(--pad) 24px;
   max-height: 340px;
   overflow: auto;
   font-family: var(--mono);
   font-size: 11.5px;
-  line-height: 1.65;
-  color: var(--signage-dim);
+  line-height: 1.7;
+  color: var(--bone-dim);
   white-space: pre-wrap;
   word-break: break-word;
 }
-.console b { color: var(--amber); font-weight: 600; }
 
-.filter input,
-.settings input[type="text"],
-.settings input[type="number"] {
-  min-height: 38px;
+/* ---------- Fields ---------- */
+
+input[type="text"], input[type="number"], input[type="search"], select {
+  min-height: 40px;
   padding: 0 11px;
-  border: 1px solid var(--rule);
-  background: var(--board-raised);
-  color: var(--signage);
+  background: var(--stone);
+  color: var(--bone);
   font-family: var(--mono);
   font-size: 13px;
+  border: 1px solid var(--carve-dark);
+  border-bottom-color: var(--carve-lit);
+  border-right-color: var(--carve-lit);
 }
+select { font-family: var(--sans); font-size: 13.5px; }
+input::placeholder { color: var(--bone-dim); }
 .filter input { width: 160px; }
-.filter input::placeholder { color: var(--signage-dim); }
 
-.check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; }
-.check input { width: 15px; height: 15px; accent-color: var(--amber); }
-
-/* ---------- Settings ---------- */
+.check { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font-size: 13px; }
+.check input { width: 16px; height: 16px; accent-color: var(--bronze); }
 
 .settings {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 18px var(--gap);
-  padding: 14px var(--pad) 26px;
+  gap: 20px var(--gap);
+  padding: 14px var(--pad) 28px;
 }
 
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label {
-  font-size: 11px;
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field > label:not(.check) {
+  font-family: var(--display);
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--signage-dim);
+  color: var(--bone-dim);
 }
-.field__note { color: var(--signage-dim); font-size: 11.5px; }
-.field--check { justify-content: flex-end; gap: 10px; }
-.field--check label { text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 400; color: var(--signage); }
+.field__note { color: var(--bone-dim); font-size: 12px; }
+.field--check { justify-content: flex-start; gap: 11px; }
+.field--check .check { color: var(--bone); }
+
+/* Checkbox labels are sentences, so they stay in the body face at body size.
+   Carved capitals are for markers, not prose. */
+.check, .check span {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.5;
+}
+.field--check .check { align-items: flex-start; }
+.field--check .check input { margin-top: 2px; }
+.field--wide { grid-column: 1 / -1; }
 
 .settings__foot {
   grid-column: 1 / -1;
@@ -346,62 +452,68 @@ main { padding-bottom: 8px; }
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding-top: 4px;
 }
-.field__errors { color: var(--stopped); font-size: 12.5px; }
+.field__errors { color: var(--blood); font-size: 12.5px; }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  min-height: 42px;
-  padding: 0 18px;
-  border: 1px solid var(--rule);
-  background: var(--board-raised);
-  color: var(--signage);
-  font-family: var(--sans);
-  font-size: 12px;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 20px;
+  background: var(--stone-raised);
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
+  border: 1px solid var(--carve-dark);
+  border-bottom-color: var(--carve-lit);
+  border-right-color: var(--carve-lit);
 }
-.btn:hover { border-color: var(--signage-dim); }
-.btn--primary { background: var(--amber); border-color: var(--amber); color: #23160a; }
-.btn--primary:hover { background: #ffc255; border-color: #ffc255; }
-.btn--danger { background: var(--stopped); border-color: var(--stopped); color: #2a0d0d; }
+.btn:hover { color: var(--bronze); }
+.btn--primary { background: var(--bronze); color: #241a08; border-color: #8a6d33; }
+.btn--primary:hover { background: #ddb668; color: #241a08; }
+.btn--danger { background: var(--blood); color: #2a0f0d; border-color: #8f3a34; }
+
+/* ---------- Gameplay ---------- */
+
+.preset-note {
+  grid-column: 1 / -1;
+  padding: 13px 15px;
+  background: var(--stone-raised);
+  border-top: 1px solid var(--carve-dark);
+  border-bottom: 1px solid var(--carve-lit);
+  color: var(--bone-dim);
+  font-size: 12.5px;
+}
+.preset-note b { color: var(--bone); font-weight: 700; }
 
 /* ---------- Foot + dialog ---------- */
 
-.foot {
-  padding: 18px var(--pad) 30px;
-  color: var(--signage-dim);
-  font-size: 12px;
-}
+.foot { padding: 20px var(--pad) 34px; color: var(--bone-dim); font-size: 12.5px; }
 
 .confirm {
-  border: 1px solid var(--rule);
-  background: var(--board-raised);
-  color: var(--signage);
-  max-width: 420px;
-  padding: 22px;
+  max-width: 430px;
+  padding: 24px;
+  background: var(--stone-raised);
+  color: var(--bone);
+  border: 1px solid var(--carve-dark);
+  border-bottom-color: var(--carve-lit);
 }
-.confirm::backdrop { background: rgb(4 10 20 / 0.72); }
-.confirm h2 { font-size: 19px; }
-.confirm p { margin-top: 10px; color: var(--signage-dim); }
-.confirm__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.confirm::backdrop { background: rgb(6 5 4 / 0.78); }
+.confirm h2 { font-family: var(--display); font-size: 19px; letter-spacing: 0.06em; }
+.confirm p { margin-top: 12px; color: var(--bone-dim); }
+.confirm__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 
-/* ---------- Focus ---------- */
+:focus-visible { outline: 2px solid var(--bronze); outline-offset: 2px; }
 
-:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: 2px;
-}
-
-/* ---------- The one authored moment: the plate rolls on state change ---------- */
+/* ---------- The one authored moment ---------- */
 
 @keyframes plate-roll {
-  0%   { transform: translateY(-52%) scaleY(0.5); opacity: 0; }
+  0%   { transform: translateY(-50%) scaleY(0.5); opacity: 0; }
   100% { transform: translateY(0) scaleY(1); opacity: 1; }
 }
 .plate__word[data-rolling="true"] {
@@ -419,15 +531,15 @@ main { padding-bottom: 8px; }
 /* ---------- Responsive ---------- */
 
 @media (max-width: 900px) {
-  .board-head { grid-template-columns: 1fr 1fr; }
-  .board-head__code { grid-column: 1 / -1; }
+  .head-grid { grid-template-columns: 1fr 1fr; }
+  .head__code { grid-column: 1 / -1; }
 }
 
 @media (max-width: 620px) {
-  .board-head { grid-template-columns: 1fr; gap: 22px; }
+  .head-grid { grid-template-columns: 1fr; gap: 22px; }
   .rail__btn { flex: 1 1 auto; min-height: 56px; justify-content: center; }
-  .rail__btn--wide { margin-left: 0; flex-basis: 100%; border-left: 0; border-top: 1px solid var(--rule); }
-  .rows--players li { grid-template-columns: 20px 1fr; }
+  .rail__btn--wide { margin-left: 0; flex-basis: 100%; border-left: 0; border-top: 1px solid var(--carve-dark); }
+  .rows--players li { grid-template-columns: 24px 1fr; }
   .rows--backups li { grid-template-columns: 1fr auto; }
   .board__head { flex-direction: column; align-items: flex-start; gap: 10px; }
 }

@@ -16,6 +16,11 @@ const el = {
   backupRows: $('backupRows'), backupsEmpty: $('backupsEmpty'), backupCount: $('backupCount'),
   console: $('console'), consoleEmpty: $('consoleEmpty'),
   logFilter: $('logFilter'), followLog: $('followLog'),
+  connection: $('connection'), connectionText: $('connectionText'),
+  worldSelect: $('f-worldSelect'), worldNew: $('f-worldNew'),
+  newWorldField: $('newWorldField'), worldNote: $('worldNote'),
+  preset: $('f-preset'), presetNote: $('presetNote'),
+  modifierFields: $('modifierFields'), toggleFields: $('toggleFields'),
   settingsForm: $('settingsForm'), settingsErrors: $('settingsErrors'),
   confirmDialog: $('confirmDialog'), confirmTitle: $('confirmTitle'),
   confirmBody: $('confirmBody'), confirmOk: $('confirmOk')
@@ -26,11 +31,12 @@ let lastState = null;
 const logLines = [];
 const LOG_MAX = 800;
 
-// Inline the sprite so <use href="#..."> resolves without a second request.
-fetch('/icons.svg')
-  .then(r => r.text())
-  .then(svg => { el.sprite.innerHTML = svg; })
+// Inline the sprites so <use href="#..."> resolves without extra requests.
+Promise.all(['/icons.svg', '/art.svg'].map(u => fetch(u).then(r => r.text())))
+  .then(parts => { el.sprite.innerHTML = parts.join(''); })
   .catch(() => {});
+
+let gameplay = null;
 
 /* ---------- helpers ---------- */
 
@@ -117,7 +123,10 @@ function renderStatus(s) {
     setTimeout(() => { delete el.statusWord.dataset.rolling; }, 340);
   }
 
-  el.uptime.textContent = s.running ? duration(s.uptimeSeconds) : '--';
+  // A server we adopted rather than started has no known start time, and
+  // showing 0m 00s would be a confident lie.
+  el.uptime.textContent = !s.running ? "--"
+    : (s.adopted && !s.startedAt) ? "unknown" : duration(s.uptimeSeconds);
 
   if (s.joinCode) {
     el.joinCode.textContent = s.joinCode;
@@ -143,11 +152,29 @@ function renderStatus(s) {
 
   renderPlayers(s);
 
+  renderConnection(s);
+
   el.btnStart.disabled = s.running || !s.installed;
   el.btnStop.disabled = !s.running;
   el.btnRestart.disabled = !s.running;
   el.btnBackup.disabled = !s.installed;
   el.btnUpdate.disabled = s.running;
+}
+
+function renderConnection(s) {
+  const c = s.connection;
+  if (!c) return;
+  el.connection.dataset.reachable = String(c.reachable);
+
+  let text = c.detail;
+  if (s.adopted) {
+    text = "This server was already running when the panel started, so the panel adopted it. "
+      + text;
+  }
+  if (c.method === 'direct' && c.publicAddress) {
+    text += ` Your address is ${c.publicAddress}.`;
+  }
+  el.connectionText.textContent = text;
 }
 
 function renderPlayers(s) {
@@ -325,32 +352,195 @@ el.logFilter.addEventListener('input', renderLog);
 
 /* ---------- settings ---------- */
 
+const NEW_WORLD = ' new';
+
+async function loadWorlds() {
+  let data = { worlds: [], current: config?.server?.world ?? '' };
+  try {
+    data = await api('/api/worlds');
+  } catch { /* keep the fallback */ }
+
+  el.worldSelect.replaceChildren();
+
+  for (const w of data.worlds) {
+    const opt = document.createElement('option');
+    opt.value = w.name;
+    opt.textContent = w.hasSave ? w.name : `${w.name} (backups only)`;
+    el.worldSelect.append(opt);
+  }
+
+  // The configured world may not exist yet - it will be generated on start.
+  if (data.current && !data.worlds.some(w => w.name === data.current)) {
+    const opt = document.createElement('option');
+    opt.value = data.current;
+    opt.textContent = `${data.current} (not created yet)`;
+    el.worldSelect.append(opt);
+  }
+
+  const create = document.createElement('option');
+  create.value = NEW_WORLD;
+  create.textContent = 'Create a new world…';
+  el.worldSelect.append(create);
+
+  el.worldSelect.value = data.current || NEW_WORLD;
+  el.worldNote.textContent = data.worlds.length
+    ? `${data.worlds.length} world${data.worlds.length === 1 ? '' : 's'} found on this PC.`
+    : 'No worlds found yet. Create one and it generates on first start.';
+
+  syncWorldField();
+}
+
+function syncWorldField() {
+  const creating = el.worldSelect.value === NEW_WORLD;
+  el.newWorldField.hidden = !creating;
+  if (creating) el.worldNew.focus();
+}
+
+el.worldSelect.addEventListener('change', syncWorldField);
+
+function chosenWorld() {
+  return el.worldSelect.value === NEW_WORLD
+    ? el.worldNew.value.trim()
+    : el.worldSelect.value;
+}
+
+async function loadGameplay() {
+  gameplay = await api('/api/gameplay');
+
+  el.preset.replaceChildren();
+  for (const [key, spec] of Object.entries(gameplay.presets)) {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = spec.label;
+    el.preset.append(opt);
+  }
+  el.preset.addEventListener('change', renderPresetNote);
+
+  el.modifierFields.replaceChildren();
+  for (const [key, spec] of Object.entries(gameplay.modifiers)) {
+    const field = document.createElement('div');
+    field.className = 'field';
+
+    const label = document.createElement('label');
+    label.setAttribute('for', `m-${key}`);
+    label.textContent = spec.label;
+
+    const select = document.createElement('select');
+    select.id = `m-${key}`;
+    select.dataset.modifier = key;
+    for (const value of spec.values) {
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = value === 'normal'
+        ? 'Normal'
+        : value.replace(/^very/, 'very ').replace(/^much/, 'much ')
+               .replace(/^./, c => c.toUpperCase());
+      select.append(opt);
+    }
+
+    const note = document.createElement('p');
+    note.className = 'field__note';
+    note.textContent = spec.help;
+
+    field.append(label, select, note);
+    el.modifierFields.append(field);
+  }
+
+  el.toggleFields.replaceChildren();
+  for (const [key, spec] of Object.entries(gameplay.toggles)) {
+    const label = document.createElement('label');
+    label.className = 'check';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.dataset.toggle = key;
+    const text = document.createElement('span');
+    text.textContent = `${spec.label} — ${spec.help}`;
+    label.append(input, text);
+    el.toggleFields.append(label);
+  }
+}
+
+function renderPresetNote() {
+  const spec = gameplay?.presets?.[el.preset.value];
+  if (!spec) { el.presetNote.textContent = ''; return; }
+  el.presetNote.replaceChildren();
+  const strong = document.createElement('b');
+  strong.textContent = `${spec.label}: `;
+  el.presetNote.append(strong, document.createTextNode(spec.summary));
+  el.presetNote.append(document.createTextNode(
+    ' The preset sets the baseline; anything you change below overrides it.'
+  ));
+}
+
 function fillSettings(cfg) {
   config = cfg;
   $('f-name').value = cfg.server.name ?? '';
-  $('f-world').value = cfg.server.world ?? '';
   $('f-password').value = cfg.server.password ?? '';
   $('f-port').value = cfg.server.port ?? 2456;
   $('f-saveinterval').value = cfg.server.saveinterval ?? 1800;
   $('f-crossplay').checked = !!cfg.server.crossplay;
   $('f-public').checked = !!cfg.server.public;
+
+  el.preset.value = (cfg.server.preset || 'normal').toLowerCase();
+  renderPresetNote();
+
+  const modifiers = cfg.server.modifiers ?? {};
+  for (const select of el.modifierFields.querySelectorAll('select')) {
+    select.value = modifiers[select.dataset.modifier] ?? 'normal';
+  }
+
+  const setkeys = cfg.server.setkeys ?? [];
+  for (const input of el.toggleFields.querySelectorAll('input')) {
+    input.checked = setkeys.includes(input.dataset.toggle);
+  }
 }
 
 el.settingsForm.addEventListener('submit', async event => {
   event.preventDefault();
   el.settingsErrors.textContent = '';
+
+  const world = chosenWorld();
+  if (!world) {
+    el.settingsErrors.textContent = 'Give the new world a name.';
+    return;
+  }
+
+  const modifiers = {};
+  for (const select of el.modifierFields.querySelectorAll('select')) {
+    modifiers[select.dataset.modifier] = select.value;
+  }
+  const setkeys = [...el.toggleFields.querySelectorAll('input')]
+    .filter(i => i.checked)
+    .map(i => i.dataset.toggle);
+
   const server = {
     name: $('f-name').value.trim(),
-    world: $('f-world').value.trim(),
+    world,
     password: $('f-password').value,
     port: Number($('f-port').value),
     saveinterval: Number($('f-saveinterval').value),
     crossplay: $('f-crossplay').checked,
-    public: $('f-public').checked
+    public: $('f-public').checked,
+    preset: el.preset.value === 'normal' ? '' : el.preset.value,
+    modifiers,
+    setkeys
   };
+
+  const changingWorld = world !== config.server.world;
+  if (changingWorld) {
+    const ok = await confirmAction({
+      title: `Switch to world "${world}"?`,
+      body: 'The current world is not deleted - it stays on disk and you can switch back. '
+        + 'If this world does not exist yet, it is generated on the next start.',
+      ok: 'Switch world'
+    });
+    if (!ok) return;
+  }
+
   try {
     const saved = await api('/api/config', { method: 'PUT', body: JSON.stringify({ server }) });
     fillSettings(saved);
+    await loadWorlds();
     notice('Settings saved. They apply the next time the server starts.');
   } catch (err) {
     el.settingsErrors.textContent = err.message;
@@ -396,7 +586,9 @@ function connect() {
 (async function boot() {
   try {
     renderStatus(await api('/api/status'));
+    await loadGameplay();
     fillSettings(await api('/api/config'));
+    await loadWorlds();
     const { lines } = await api('/api/log');
     logLines.push(...lines.slice(-LOG_MAX));
     renderLog();

@@ -4,117 +4,133 @@
 
 ## The world
 
-**A Scandinavian transit departure board.**
+**A carved runestone.**
 
-Not a dashboard that borrows a transit palette — the board itself, with its
-logic intact. A departure board exists to answer, from across a room, in under
-two seconds: is the service running, where does it leave from, how many, and is
-anything disrupted. That is the whole job of this panel, stated by a different
-industry that solved it decades ago.
+The user pinned Valheim as the brief, and a pinned brief beats the roll. What
+remains a decision is the *register* — which of the many things "Valheim" could
+mean this becomes. The answer is stone carving, taken as a real craft rather
+than as fantasy set dressing.
 
-The reference is specific: Stockholm SL and the Nordic station-hall boards —
-deep signage blue, white signage type, amber for live values, a strict ruled
-row grid, and disruption notices that interrupt the grid rather than tint it.
+On an actual Viking-age runestone the inscription runs inside a **serpent
+band**: a carved ribbon that winds around the face of the stone, its body
+holding the text, its head and tail meeting at the base. This is a genuine
+structural device, not ornament — the band organises the surface. It gives the
+page a header ornament with real logic behind it, and it is the single art
+element that carries the world.
 
-Chosen by roll from a seven-candidate derivation (ship's log, homelab rack
-faceplate, weather warning board, transit signage, Swedish modernist print,
-runestone carving, field specimen sheet). Iron Gate is a Stockholm studio, so
-the Swedishness is real rather than decorative — but nothing here is Norse
-costume. There are no runes, no parchment, no axes.
+The letterforms follow the same principle. Type is set in **Cinzel**, drawn from
+classical inscriptional capitals — letters designed to be *cut into stone*. Not
+a fake-runic novelty face. Real carved-letter practice, honestly applied.
 
-**Anti-reference:** the dark-slate-with-ember-accent game dashboard. That is the
-category default this direction exists to refuse. Also refused: the
-hacker-terminal green-on-black, which the oscilloscope challenger would have
-pulled toward and which breaks the contrast floor.
+Everything on the page is either cut into the stone or raised from it. Rules are
+carved channels — a dark line above a light one — never borders.
 
-## Why it fits the product
+**Replaces:** the Scandinavian transit departure board (v1). Its structural
+logic survives, because that logic was sound and this is an Operate surface:
+status plate, oversized join code, one ruled grid, no cards. Only the material
+world is replaced.
 
-| Departure board element | Panel element |
-|---|---|
-| Service running / cancelled | Server up / down — stated in words, not color |
-| Platform number | **Join code** — the biggest thing on the board |
-| Departure roster | Players connected |
-| Delay notice | Warnings: backup skipped, update needed, slow first boot |
-| Timetable footnote | Player count qualified as best-effort |
-| Ruled row grid | Backups, settings, log — one grid, no cards |
-
-The board metaphor also carries the honesty principle. A real board says
-"beräknad" (estimated) when it does not know. This one says when the player
-count is inferred rather than reported.
-
-## Light or dark
-
-**Dark**, chosen from the use scene rather than category habit: the host is
-alt-tabbed out of a full-screen dark game, often at night, and a white page is
-a flashbang. Station boards are emissive dark for the same reason — read at a
-glance in varied light.
+**Anti-reference, and the thing this must keep refusing:** fantasy pastiche.
+Dragon ornament, gold filigree, torn parchment, blackletter, fake runes as a
+display font. Valheim's actual art direction is muted, foggy, low-poly and
+restrained; the pastiche version is the opposite of the source, and reaching for
+it would be failing the brief while appearing to serve it.
 
 ## Palette
 
-Deep signage blue as the ground, not neutral slate. The blue is what separates
-this from the rut.
+Weathered stone and bone, with the game's biomes doing the colour work.
 
-| Token | Value | Use |
-|---|---|---|
-| `--board` | `#0a1628` | Board ground |
-| `--board-raised` | `#122238` | Row bands, panels |
-| `--rule` | `#1f3550` | Hairline rules between rows |
-| `--signage` | `#f2f5f8` | Primary text, signage white |
-| `--signage-dim` | `#9fb2c9` | Secondary text — tinted from the blue, never gray |
-| `--amber` | `#ffb02e` | Live values: join code, uptime, counts |
-| `--running` | `#4ade80` | Running state, always paired with the word |
-| `--stopped` | `#f87171` | Stopped state, always paired with the word |
-| `--notice` | `#ff8a3d` | Disruption band |
+| Token | Value | Use | Contrast on stone |
+|---|---|---|---|
+| `--stone` | `#14120f` | Ground — warm near-black, not neutral | — |
+| `--stone-raised` | `#1e1b16` | Raised panels | — |
+| `--carve-dark` | `#0a0908` | The cut shadow of a carved channel | — |
+| `--carve-lit` | `#3a342a` | The lit lower edge of a channel | — |
+| `--bone` | `#e8e0d0` | Primary text | 14.25:1 |
+| `--bone-dim` | `#a89e88` | Secondary text — warm, never gray | 7.04:1 |
+| `--bronze` | `#d0a758` | Live values: join code, uptime, counts | 8.33:1 |
+| `--moss` | `#8fbc5a` | Running (Meadows) | 8.47:1 |
+| `--blood` | `#e0645a` | Stopped | 4.9:1 |
+| `--frost` | `#a8cee0` | Deep North accent — 1.0's headline biome | 11.19:1 |
+| `--ember` | `#e0742f` | Warnings (Ashlands) | 5.97:1 |
 
-Contrast: `--signage` on `--board` is ~15:1; `--signage-dim` on `--board` is
-~7:1; `--amber` on `--board` is ~9:1. All clear 4.5:1.
+The biomes are a real, product-specific colour system rather than an invented
+one — Meadows green, Deep North frost, Ashlands ember. Section markers carry a
+biome tint so the page has variety without a second palette.
 
-**State is never color alone.** Running and stopped are set as words in a
-status plate, with a filled versus hollow indicator. Colour is the third signal,
-not the first.
+Gold is **dull bronze**, not bright yellow. That restraint is the difference
+between Valheim and pastiche.
+
+**State is never colour alone.** Running and stopped are set as words in a
+carved plate, with a filled versus hollow mark. Colour is the third signal.
 
 ## Type
 
-Self-hosted, in `public/fonts/`. No system display face.
+Self-hosted in `public/fonts/`. 108 KB total, works offline.
 
-- **Archivo** — the board voice. Heavy grotesk with a large x-height, the
-  closest open face to Nordic signage lettering. Used for status plates, section
-  headings, and buttons, in caps with tight tracking.
-- **Martian Mono** — data only, and legitimately: join code, uptime, player
-  counts, timestamps, log lines. Tabular figures so numbers do not shimmer as
-  they tick. Monospace here is measurement, not costume.
+- **Cinzel** — display. Inscriptional Roman capitals, letters made to be cut
+  into stone. Used for the service name, status plate, and section markers, in
+  caps with open tracking, as inscription is set.
+- **Alegreya Sans** — body. A warm humanist sans; a cold neo-grotesk would fight
+  the stone.
+- **IBM Plex Mono** — data only, and legitimately so: join code, uptime, counts,
+  timestamps, log lines. Tabular figures so numbers do not shimmer as they tick.
 
-Scale steps: 11px labels · 13px body · 15px row text · 22px section · 44px board
-status · 64px join code. Tracking floor -0.04em on display sizes.
+Scale: 11px markers · 13.5px body · 15px row text · 22px section · 40px status ·
+64px join code. Tracking opens rather than tightens on display sizes, because
+carved capitals are spaced apart, not crowded.
+
+## Materials
+
+**The carved channel** is the page's one structural device, used for every rule
+and every inset field:
+
+```
+border-top: 1px solid var(--carve-dark);
+border-bottom: 1px solid var(--carve-lit);
+```
+
+Dark above, lit below — the way a cut in stone catches light from above. It
+replaces every plain border and is why the page reads as carved rather than
+drawn.
+
+**Stone grain** is a single tiled SVG turbulence at very low opacity over the
+ground. One texture, not a photograph.
+
+**Fog.** Valheim's signature is atmospheric depth — distance fades. The board
+ground carries a slow vertical gradient, lighter at the top, so the page has
+depth without a shadow anywhere.
+
+## Art
+
+Authored original SVG in `public/art.svg`. No traced or extracted game assets.
+
+- **Serpent band** — the header ornament. A winding ribbon with a carved inner
+  channel, head and tail meeting, drawn in the runestone convention. Sits above
+  the service name, full width, and is the page's one decorative moment.
+- **Biome marks** — eight small carved glyphs, one per biome, used as section
+  markers.
+- **Icon set** — eight controls, one 1.75px stroke on a 24px grid.
+
+No emoji, no unicode glyphs, anywhere.
 
 ## Composition
 
-One ruled grid, top to bottom. No cards, no nested containers.
+Unchanged from v1, because it works and this is an Operate surface:
 
-1. **Board head** — service name, status plate, join code. The only place with
-   visual weight; it answers the three questions and is legible from a couch.
-2. **Action rail** — one row of controls, horizontal, drawn icons plus caps
-   labels.
-3. **Sections** — Departures (players), Backups, Console, Settings. Each is a
-   ruled table on the same grid, headed by a caps rule label.
-
-Disruption notices interrupt the grid full-width above the section they concern,
-in the notice colour, with the problem and its recovery.
-
-## Icons
-
-Authored SVG sprite in `public/icons.svg`, eight glyphs: start, stop, restart,
-backup, restore, download, update, settings. One 1.75px stroke, 24px grid,
-square cap, no fill. **No emoji and no unicode glyphs anywhere in the UI.**
+1. **Stone head** — serpent band, service name, status plate, join code.
+2. **Connection** — how friends actually get in, stated plainly.
+3. **Action rail** — one row of carved controls.
+4. **Sections** — Connected, Backups, Console, World & Settings, Gameplay.
 
 ## Motion
 
-One authored moment: the status plate does a flip-board character roll when the
-server changes state, 320ms, exponential ease-out. Nothing else animates.
-`prefers-reduced-motion` snaps the plate instead of rolling it.
+One authored moment: the status plate rolls when the server changes state,
+320ms, exponential ease-out. Nothing else animates. `prefers-reduced-motion`
+snaps instead.
 
 ## Responsive
 
-The board head stacks and the join code stays largest at every width. Section
-tables scroll inside their own container; the page body never scrolls
-horizontally. Touch targets 44px on the action rail.
+The stone head stacks; the join code stays largest at every width. Section
+tables scroll inside their own container; the body never scrolls horizontally.
+Touch targets 44px on the rail.

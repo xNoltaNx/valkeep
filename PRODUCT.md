@@ -97,13 +97,21 @@ Terminology, used exactly as Valheim uses it: **world** (not "save" or "map"),
 
 ## Brand Commitments
 
-None. The project has no existing name, logo, palette, or visual identity, and
-the user has made no aesthetic commitment binding.
+**Binding, set by the user on 2026-09-07:** the panel is themed to Valheim —
+the game's own colours and art register. This is a pinned aesthetic and
+overrides any generic direction, including a design roll.
 
-Explicitly **not** a commitment: the "dark slate with an ember accent" direction
-proposed early in the design conversation. It was identified as the category
-default and demoted to a standing exit — available if deliberately chosen, never
-the assumed answer.
+What that pin does *not* license, and what future work must keep refusing:
+generic fantasy pastiche. Valheim's real art direction is muted, low-poly,
+foggy and restrained — not saturated, not ornate, not gold-filigree. Fake runic
+display faces, parchment textures and dragon ornament are the pastiche rut, and
+they are the opposite of the source.
+
+All artwork is **authored original SVG**. Iron Gate's assets are their
+copyrighted work and are never extracted, traced, or copied.
+
+Explicitly **not** a commitment: the "dark slate with an ember accent" game
+dashboard, which remains the category default this project refuses.
 
 ## Evidence on Hand
 
