@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en" data-state="unknown">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Valheim Server Board</title>
+<link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/martianmono-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div id="sprite" aria-hidden="true"></div>
+
+<header class="board-head">
+  <div class="board-head__service">
+    <p class="rule-label">Service</p>
+    <h1 id="serverName">Valheim</h1>
+    <p class="board-head__world">
+      World <span id="worldName" class="data">&mdash;</span>
+      <span class="sep" aria-hidden="true">/</span>
+      Port <span id="portNum" class="data">&mdash;</span>
+      <span class="sep" aria-hidden="true">/</span>
+      Build <span id="buildId" class="data">&mdash;</span>
+    </p>
+  </div>
+
+  <div class="board-head__status">
+    <p class="rule-label">Status</p>
+    <p class="plate" id="statusPlate" data-state="unknown">
+      <span class="plate__dot" aria-hidden="true"></span>
+      <span class="plate__word" id="statusWord">Checking</span>
+    </p>
+    <p class="board-head__uptime">
+      Uptime <span id="uptime" class="data">&mdash;</span>
+    </p>
+  </div>
+
+  <div class="board-head__code">
+    <p class="rule-label">Join code</p>
+    <p class="joincode" id="joinCode" data-empty="true">Not registered</p>
+    <button class="linkbtn" id="copyCode" type="button" hidden>Copy join code</button>
+    <p class="board-head__hint" id="codeHint">Crossplay code appears once the server registers. It changes every restart.</p>
+  </div>
+</header>
+
+<div id="notices" role="status" aria-live="polite"></div>
+
+<nav class="rail" aria-label="Server controls">
+  <button class="rail__btn" id="btnStart" type="button">
+    <svg class="ico" aria-hidden="true"><use href="#i-start"></use></svg><span>Start</span>
+  </button>
+  <button class="rail__btn" id="btnStop" type="button">
+    <svg class="ico" aria-hidden="true"><use href="#i-stop"></use></svg><span>Stop</span>
+  </button>
+  <button class="rail__btn" id="btnRestart" type="button">
+    <svg class="ico" aria-hidden="true"><use href="#i-restart"></use></svg><span>Restart</span>
+  </button>
+  <button class="rail__btn" id="btnBackup" type="button">
+    <svg class="ico" aria-hidden="true"><use href="#i-backup"></use></svg><span>Back up now</span>
+  </button>
+  <button class="rail__btn rail__btn--wide" id="btnUpdate" type="button">
+    <svg class="ico" aria-hidden="true"><use href="#i-update"></use></svg><span>Update server</span>
+  </button>
+</nav>
+
+<main>
+
+<section class="board" aria-labelledby="h-players">
+  <div class="board__head">
+    <h2 class="rule-label" id="h-players">Connected</h2>
+    <p class="board__meta"><span id="playerCount" class="data">0</span> <span id="playerQual">connected</span></p>
+  </div>
+  <ol class="rows rows--players" id="playerRows"></ol>
+  <p class="empty" id="playersEmpty">Nobody is connected.</p>
+</section>
+
+<section class="board" aria-labelledby="h-backups">
+  <div class="board__head">
+    <h2 class="rule-label" id="h-backups">Backups</h2>
+    <p class="board__meta"><span id="backupCount" class="data">0</span> kept</p>
+  </div>
+  <ol class="rows rows--backups" id="backupRows"></ol>
+  <p class="empty" id="backupsEmpty">No backups yet.</p>
+</section>
+
+<section class="board board--console" aria-labelledby="h-console">
+  <div class="board__head">
+    <h2 class="rule-label" id="h-console">Console</h2>
+    <div class="board__tools">
+      <label class="filter">
+        <span class="visually-hidden">Filter log lines</span>
+        <input type="search" id="logFilter" placeholder="Filter" autocomplete="off">
+      </label>
+      <label class="check">
+        <input type="checkbox" id="followLog" checked>
+        <span>Follow</span>
+      </label>
+    </div>
+  </div>
+  <pre class="console" id="console" tabindex="0" aria-label="Server log"></pre>
+  <p class="empty" id="consoleEmpty">Nothing logged yet. The console fills once the server starts.</p>
+</section>
+
+<section class="board" aria-labelledby="h-settings">
+  <div class="board__head">
+    <h2 class="rule-label" id="h-settings">Settings</h2>
+    <p class="board__meta">Applied on next start</p>
+  </div>
+
+  <form class="settings" id="settingsForm">
+    <div class="field">
+      <label for="f-name">Server name</label>
+      <input id="f-name" name="name" type="text" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="f-world">World</label>
+      <input id="f-world" name="world" type="text" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="f-password">Password</label>
+      <input id="f-password" name="password" type="text" autocomplete="off">
+      <p class="field__note">At least 5 characters, and not the same as the server name.</p>
+    </div>
+    <div class="field field--narrow">
+      <label for="f-port">Port</label>
+      <input id="f-port" name="port" type="number" inputmode="numeric">
+    </div>
+    <div class="field field--narrow">
+      <label for="f-saveinterval">Save interval (s)</label>
+      <input id="f-saveinterval" name="saveinterval" type="number" inputmode="numeric">
+    </div>
+    <div class="field field--check">
+      <label class="check">
+        <input type="checkbox" id="f-crossplay" name="crossplay">
+        <span>Crossplay &mdash; PC, Xbox, PS5, Switch 2</span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="f-public" name="public">
+        <span>List publicly in the server browser</span>
+      </label>
+    </div>
+
+    <div class="settings__foot">
+      <p class="field__errors" id="settingsErrors" role="alert"></p>
+      <button class="btn btn--primary" type="submit">
+        <svg class="ico" aria-hidden="true"><use href="#i-settings"></use></svg><span>Save settings</span>
+      </button>
+    </div>
+  </form>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p>LAN only &mdash; no password protects this page. Do not forward this port.</p>
+</footer>
+
+<dialog class="confirm" id="confirmDialog">
+  <form method="dialog">
+    <h2 id="confirmTitle">Are you sure?</h2>
+    <p id="confirmBody"></p>
+    <div class="confirm__actions">
+      <button value="cancel" class="btn">Cancel</button>
+      <button value="ok" class="btn btn--danger" id="confirmOk">Continue</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/app.js" type="module"></script>
+</body>
+</html>

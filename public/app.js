@@ -1,0 +1,408 @@
+/* Valheim Server Board - browser client. */
+
+const $ = id => document.getElementById(id);
+
+const el = {
+  sprite: $('sprite'),
+  serverName: $('serverName'), worldName: $('worldName'),
+  portNum: $('portNum'), buildId: $('buildId'),
+  statusPlate: $('statusPlate'), statusWord: $('statusWord'), uptime: $('uptime'),
+  joinCode: $('joinCode'), copyCode: $('copyCode'), codeHint: $('codeHint'),
+  notices: $('notices'),
+  btnStart: $('btnStart'), btnStop: $('btnStop'), btnRestart: $('btnRestart'),
+  btnBackup: $('btnBackup'), btnUpdate: $('btnUpdate'),
+  playerRows: $('playerRows'), playersEmpty: $('playersEmpty'),
+  playerCount: $('playerCount'), playerQual: $('playerQual'),
+  backupRows: $('backupRows'), backupsEmpty: $('backupsEmpty'), backupCount: $('backupCount'),
+  console: $('console'), consoleEmpty: $('consoleEmpty'),
+  logFilter: $('logFilter'), followLog: $('followLog'),
+  settingsForm: $('settingsForm'), settingsErrors: $('settingsErrors'),
+  confirmDialog: $('confirmDialog'), confirmTitle: $('confirmTitle'),
+  confirmBody: $('confirmBody'), confirmOk: $('confirmOk')
+};
+
+let config = null;
+let lastState = null;
+const logLines = [];
+const LOG_MAX = 800;
+
+// Inline the sprite so <use href="#..."> resolves without a second request.
+fetch('/icons.svg')
+  .then(r => r.text())
+  .then(svg => { el.sprite.innerHTML = svg; })
+  .catch(() => {});
+
+/* ---------- helpers ---------- */
+
+const api = async (path, options) => {
+  const res = await fetch(path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error ?? (body.errors ?? []).join(' ') ?? `HTTP ${res.status}`);
+  return body;
+};
+
+function duration(seconds) {
+  if (!seconds || seconds < 0) return '--';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return h > 0
+    ? `${h}h ${String(m).padStart(2, '0')}m`
+    : `${m}m ${String(s).padStart(2, '0')}s`;
+}
+
+function bytes(n) {
+  if (!n) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let i = 0;
+  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+  return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function when(ms) {
+  const d = new Date(ms);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function confirmAction({ title, body, ok }) {
+  el.confirmTitle.textContent = title;
+  el.confirmBody.textContent = body;
+  el.confirmOk.textContent = ok;
+  el.confirmDialog.showModal();
+  return new Promise(resolve => {
+    el.confirmDialog.addEventListener(
+      'close',
+      () => resolve(el.confirmDialog.returnValue === 'ok'),
+      { once: true }
+    );
+  });
+}
+
+let noticeSeq = 0;
+function notice(text, { sticky = false } = {}) {
+  const id = `notice-${++noticeSeq}`;
+  const div = document.createElement('div');
+  div.className = 'notice';
+  div.id = id;
+  div.innerHTML =
+    '<svg class="ico" aria-hidden="true"><use href="#i-warning"></use></svg><p></p>';
+  div.querySelector('p').textContent = text;
+  el.notices.append(div);
+  if (!sticky) setTimeout(() => div.remove(), 9000);
+  return div;
+}
+
+/* ---------- rendering ---------- */
+
+function renderStatus(s) {
+  lastState = s;
+
+  el.serverName.textContent = s.serverName || 'Valheim';
+  el.worldName.textContent = s.world || '--';
+  el.portNum.textContent = s.port ?? '--';
+  el.buildId.textContent = s.buildid || '--';
+
+  const state = s.running ? 'running' : 'stopped';
+  const word = s.running ? 'Running' : 'Stopped';
+  if (el.statusPlate.dataset.state !== state) {
+    el.statusPlate.dataset.state = state;
+    document.documentElement.dataset.state = state;
+    el.statusWord.textContent = word;
+    // The one authored moment: the plate rolls like a flip board.
+    el.statusWord.dataset.rolling = 'true';
+    setTimeout(() => { delete el.statusWord.dataset.rolling; }, 340);
+  }
+
+  el.uptime.textContent = s.running ? duration(s.uptimeSeconds) : '--';
+
+  if (s.joinCode) {
+    el.joinCode.textContent = s.joinCode;
+    el.joinCode.dataset.empty = 'false';
+    el.copyCode.hidden = false;
+    el.codeHint.textContent = 'Share this with your friends. It changes every restart.';
+  } else {
+    el.joinCode.textContent = 'Not registered';
+    el.joinCode.dataset.empty = 'true';
+    el.copyCode.hidden = true;
+    el.codeHint.textContent = s.running
+      ? (s.crossplay
+        ? 'Waiting for the crossplay session to register.'
+        : 'Crossplay is off, so there is no join code. Friends connect by IP and port.')
+      : 'Crossplay code appears once the server registers. It changes every restart.';
+  }
+
+  el.playerCount.textContent = s.playerCount ?? 0;
+  // Never claim more certainty than the log supports.
+  el.playerQual.textContent = s.playerCountSource === 'session'
+    ? 'reported by the server'
+    : 'inferred from connections';
+
+  renderPlayers(s);
+
+  el.btnStart.disabled = s.running || !s.installed;
+  el.btnStop.disabled = !s.running;
+  el.btnRestart.disabled = !s.running;
+  el.btnBackup.disabled = !s.installed;
+  el.btnUpdate.disabled = s.running;
+}
+
+function renderPlayers(s) {
+  const names = s.players ?? [];
+  const count = s.playerCount ?? 0;
+  el.playerRows.replaceChildren();
+
+  const rows = [];
+  names.forEach((n, i) => rows.push({ idx: i + 1, who: n, tag: '' }));
+  // The count can exceed the names we know: someone connected but has not
+  // spawned a character yet. Show the gap rather than hiding it.
+  for (let i = names.length; i < count; i++) {
+    rows.push({ idx: i + 1, who: 'Connecting', tag: 'no character yet' });
+  }
+
+  for (const r of rows) {
+    const li = document.createElement('li');
+    const idx = document.createElement('span');
+    idx.className = 'idx data';
+    idx.textContent = String(r.idx).padStart(2, '0');
+    const who = document.createElement('span');
+    who.className = 'who';
+    who.textContent = r.who;
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = r.tag;
+    li.append(idx, who, tag);
+    el.playerRows.append(li);
+  }
+  el.playersEmpty.hidden = rows.length > 0;
+}
+
+async function loadBackups() {
+  let list = [];
+  try {
+    list = await api('/api/backups');
+  } catch {
+    return;
+  }
+  el.backupCount.textContent = list.length;
+  el.backupRows.replaceChildren();
+
+  for (const b of list) {
+    const li = document.createElement('li');
+
+    const w = document.createElement('span');
+    w.className = 'when';
+    w.textContent = when(b.createdAt);
+    if (b.label) {
+      const tag = document.createElement('span');
+      tag.className = 'label';
+      tag.textContent = b.label;
+      w.append(tag);
+    }
+
+    const size = document.createElement('span');
+    size.className = 'size';
+    size.textContent = `${bytes(b.sizeBytes)} / ${b.fileCount} files`;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.type = 'button';
+    btn.innerHTML = '<svg class="ico" aria-hidden="true"><use href="#i-restore"></use></svg><span>Restore</span>';
+    btn.addEventListener('click', () => restore(b));
+
+    li.append(w, size, btn);
+    el.backupRows.append(li);
+  }
+  el.backupsEmpty.hidden = list.length > 0;
+}
+
+function renderLog() {
+  const needle = el.logFilter.value.trim().toLowerCase();
+  const shown = needle
+    ? logLines.filter(l => l.toLowerCase().includes(needle))
+    : logLines;
+  el.console.textContent = shown.join('\n');
+
+  el.consoleEmpty.hidden = shown.length > 0;
+  el.consoleEmpty.textContent = logLines.length
+    ? 'No log lines match that filter.'
+    : 'Nothing logged yet. The console fills once the server starts.';
+
+  if (el.followLog.checked) el.console.scrollTop = el.console.scrollHeight;
+}
+
+function pushLog(line) {
+  logLines.push(line);
+  if (logLines.length > LOG_MAX) logLines.shift();
+  renderLog();
+}
+
+/* ---------- actions ---------- */
+
+async function act(button, path, body) {
+  const previous = button.disabled;
+  button.disabled = true;
+  try {
+    await api(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined });
+  } catch (err) {
+    notice(err.message);
+    button.disabled = previous;
+  }
+}
+
+el.btnStart.addEventListener('click', () => act(el.btnStart, '/api/server/start'));
+
+el.btnStop.addEventListener('click', async () => {
+  const ok = await confirmAction({
+    title: 'Stop the server?',
+    body: 'Everyone online will be disconnected. A backup is taken first, and the world is saved during shutdown.',
+    ok: 'Stop server'
+  });
+  if (ok) act(el.btnStop, '/api/server/stop');
+});
+
+el.btnRestart.addEventListener('click', async () => {
+  const ok = await confirmAction({
+    title: 'Restart the server?',
+    body: 'Everyone is disconnected and the join code changes. A backup is taken first.',
+    ok: 'Restart'
+  });
+  if (ok) act(el.btnRestart, '/api/server/restart');
+});
+
+el.btnBackup.addEventListener('click', async () => {
+  el.btnBackup.disabled = true;
+  try {
+    const meta = await api('/api/backups', { method: 'POST' });
+    notice(`Backed up ${meta.fileCount} files, ${bytes(meta.sizeBytes)}.`);
+    loadBackups();
+  } catch (err) {
+    notice(err.message);
+  } finally {
+    el.btnBackup.disabled = false;
+  }
+});
+
+el.btnUpdate.addEventListener('click', async () => {
+  const ok = await confirmAction({
+    title: 'Update the server?',
+    body: 'Downloads the latest build from Steam. Valheim locks versions, so the server must match what your friends are running.',
+    ok: 'Update now'
+  });
+  if (ok) act(el.btnUpdate, '/api/install');
+});
+
+async function restore(backup) {
+  const ok = await confirmAction({
+    title: 'Restore this backup?',
+    body: `This replaces the current world with the copy from ${when(backup.createdAt)}. The current world is backed up first, so this is reversible.`,
+    ok: 'Restore world'
+  });
+  if (!ok) return;
+  try {
+    await api(`/api/backups/${encodeURIComponent(backup.id)}/restore`, { method: 'POST' });
+    notice('World restored. The previous world was saved as a pre-restore backup.');
+    loadBackups();
+  } catch (err) {
+    notice(err.message);
+  }
+}
+
+el.copyCode.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(el.joinCode.textContent.trim());
+    el.copyCode.textContent = 'Copied';
+    setTimeout(() => { el.copyCode.textContent = 'Copy join code'; }, 1600);
+  } catch {
+    notice('Could not copy. Select the code and copy it manually.');
+  }
+});
+
+el.logFilter.addEventListener('input', renderLog);
+
+/* ---------- settings ---------- */
+
+function fillSettings(cfg) {
+  config = cfg;
+  $('f-name').value = cfg.server.name ?? '';
+  $('f-world').value = cfg.server.world ?? '';
+  $('f-password').value = cfg.server.password ?? '';
+  $('f-port').value = cfg.server.port ?? 2456;
+  $('f-saveinterval').value = cfg.server.saveinterval ?? 1800;
+  $('f-crossplay').checked = !!cfg.server.crossplay;
+  $('f-public').checked = !!cfg.server.public;
+}
+
+el.settingsForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  el.settingsErrors.textContent = '';
+  const server = {
+    name: $('f-name').value.trim(),
+    world: $('f-world').value.trim(),
+    password: $('f-password').value,
+    port: Number($('f-port').value),
+    saveinterval: Number($('f-saveinterval').value),
+    crossplay: $('f-crossplay').checked,
+    public: $('f-public').checked
+  };
+  try {
+    const saved = await api('/api/config', { method: 'PUT', body: JSON.stringify({ server }) });
+    fillSettings(saved);
+    notice('Settings saved. They apply the next time the server starts.');
+  } catch (err) {
+    el.settingsErrors.textContent = err.message;
+  }
+});
+
+/* ---------- live stream ---------- */
+
+function connect() {
+  const source = new EventSource('/api/stream');
+
+  source.addEventListener('status', e => renderStatus(JSON.parse(e.data)));
+  source.addEventListener('log', e => pushLog(JSON.parse(e.data).line));
+  source.addEventListener('backups', () => loadBackups());
+
+  source.addEventListener('progress', e => {
+    const d = JSON.parse(e.data);
+    notice(d.text);
+  });
+
+  source.addEventListener('install', e => {
+    const d = JSON.parse(e.data);
+    pushLog(d.percent != null ? `[update ${d.percent}%] ${d.line}` : `[update] ${d.line}`);
+    if (d.done) notice('Server updated. Start it when you are ready.');
+    if (d.error) notice(d.line, { sticky: true });
+  });
+
+  source.addEventListener('events', e => {
+    for (const ev of JSON.parse(e.data)) {
+      if (ev.type === 'character' && !ev.isDeath) notice(`${ev.name} joined.`);
+      if (ev.type === 'joinCode') notice(`Join code is ${ev.code}.`);
+    }
+  });
+
+  source.onerror = () => {
+    source.close();
+    setTimeout(connect, 3000);
+  };
+}
+
+/* ---------- boot ---------- */
+
+(async function boot() {
+  try {
+    renderStatus(await api('/api/status'));
+    fillSettings(await api('/api/config'));
+    const { lines } = await api('/api/log');
+    logLines.push(...lines.slice(-LOG_MAX));
+    renderLog();
+    await loadBackups();
+  } catch (err) {
+    notice(`Could not reach the panel: ${err.message}`, { sticky: true });
+  }
+  connect();
+})();

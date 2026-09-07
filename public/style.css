@@ -1,0 +1,433 @@
+/*
+  Valheim Server Board
+  World: Scandinavian transit departure board. See DESIGN.md.
+  Deep signage blue, signage white, amber for live values, one ruled grid.
+*/
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('/fonts/archivo-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Martian Mono';
+  src: url('/fonts/martianmono-latin.woff2') format('woff2');
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+:root {
+  --board: #0a1628;
+  --board-raised: #122238;
+  --rule: #1f3550;
+  --rule-strong: #2c4a6e;
+  /* Disabled controls must still be readable: 4.58:1 on the board ground.
+     A disabled button nobody can read is a legibility bug, not a state. */
+  --disabled: #6b829d;
+  --signage: #f2f5f8;
+  --signage-dim: #9fb2c9;
+  --amber: #ffb02e;
+  --running: #4ade80;
+  --stopped: #f87171;
+  --notice: #ff8a3d;
+
+  --sans: 'Archivo', system-ui, sans-serif;
+  --mono: 'Martian Mono', ui-monospace, monospace;
+
+  --gap: 20px;
+  --pad: clamp(16px, 4vw, 40px);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { background: var(--board); }
+
+body {
+  margin: 0;
+  background: var(--board);
+  color: var(--signage);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2 { margin: 0; font-weight: 800; letter-spacing: -0.02em; }
+p { margin: 0; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.data { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* Caps rule label: the board's section marker. */
+.rule-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--signage-dim);
+}
+
+.ico {
+  width: 18px; height: 18px;
+  flex: none;
+  display: block;
+}
+
+/* ---------- Board head ---------- */
+
+.board-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr) minmax(0, 1.2fr);
+  gap: var(--gap);
+  align-items: start;
+  padding: clamp(20px, 4vw, 36px) var(--pad);
+  border-bottom: 2px solid var(--rule);
+  background: var(--board-raised);
+}
+
+.board-head__service h1 {
+  font-size: clamp(24px, 4vw, 34px);
+  margin-top: 6px;
+  line-height: 1.1;
+}
+
+.board-head__world,
+.board-head__uptime {
+  margin-top: 8px;
+  color: var(--signage-dim);
+  font-size: 12px;
+}
+
+.board-head__world .sep { padding: 0 6px; color: var(--rule); }
+
+.plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 8px 14px 8px 12px;
+  border: 1px solid var(--rule);
+  background: var(--board);
+  font-size: clamp(20px, 3.4vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.plate__dot {
+  width: 13px; height: 13px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+/* State is carried by the word and the dot fill first, colour third. */
+.plate[data-state="running"] { color: var(--running); }
+.plate[data-state="running"] .plate__dot { background: currentColor; }
+.plate[data-state="stopped"] { color: var(--stopped); }
+.plate[data-state="stopped"] .plate__dot { background: transparent; }
+.plate[data-state="working"] { color: var(--amber); }
+.plate[data-state="working"] .plate__dot {
+  background: repeating-linear-gradient(45deg, currentColor 0 3px, transparent 3px 6px);
+}
+.plate[data-state="unknown"] { color: var(--signage-dim); }
+
+.joincode {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(34px, 7vw, 60px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  color: var(--amber);
+  margin-top: 4px;
+}
+.joincode[data-empty="true"] {
+  font-size: clamp(17px, 2.4vw, 22px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--signage-dim);
+}
+
+.board-head__hint {
+  margin-top: 10px;
+  max-width: 46ch;
+  color: var(--signage-dim);
+  font-size: 12px;
+}
+
+.linkbtn {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--signage);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.linkbtn:hover { color: var(--amber); }
+
+/* ---------- Notices ---------- */
+
+.notice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px var(--pad);
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--notice) 14%, var(--board));
+  color: var(--signage);
+  font-size: 13px;
+}
+.notice .ico { color: var(--notice); margin-top: 1px; }
+
+/* ---------- Action rail ---------- */
+
+.rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 2px solid var(--rule);
+  background: var(--board);
+}
+
+.rail__btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 52px;
+  padding: 0 clamp(14px, 2.4vw, 22px);
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: none;
+  color: var(--signage);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms;
+}
+.rail__btn:hover:not(:disabled) { background: var(--board-raised); color: var(--amber); }
+.rail__btn:disabled { color: var(--disabled); cursor: not-allowed; }
+.rail__btn--wide { margin-left: auto; border-right: 0; border-left: 1px solid var(--rule); }
+
+/* ---------- Sections ---------- */
+
+main { padding-bottom: 8px; }
+
+.board { border-bottom: 1px solid var(--rule); }
+
+.board__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 22px var(--pad) 10px;
+}
+
+.board__meta { color: var(--signage-dim); font-size: 12px; }
+.board__meta .data { color: var(--signage); }
+
+.board__tools { display: flex; align-items: center; gap: 16px; }
+
+.rows { list-style: none; margin: 0; padding: 0; }
+
+.rows li {
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  padding: 11px var(--pad);
+  border-top: 1px solid var(--rule);
+}
+
+.rows--players li { grid-template-columns: 22px 1fr auto; }
+.rows--players .idx { color: var(--signage-dim); font-size: 12px; }
+.rows--players .who { font-weight: 600; font-size: 15px; }
+.rows--players .tag {
+  color: var(--signage-dim);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.rows--backups li { grid-template-columns: 1fr auto auto; }
+.rows--backups .when { font-family: var(--mono); font-size: 13px; }
+.rows--backups .size { color: var(--signage-dim); font-family: var(--mono); font-size: 12px; }
+.rows--backups .label {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 1px 7px;
+  border: 1px solid var(--rule);
+  color: var(--signage-dim);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.empty {
+  padding: 4px var(--pad) 22px;
+  color: var(--signage-dim);
+}
+
+/* ---------- Console ---------- */
+
+.console:empty { display: none; }
+
+.console {
+  margin: 0;
+  padding: 14px var(--pad) 22px;
+  max-height: 340px;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--signage-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.console b { color: var(--amber); font-weight: 600; }
+
+.filter input,
+.settings input[type="text"],
+.settings input[type="number"] {
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--rule);
+  background: var(--board-raised);
+  color: var(--signage);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.filter input { width: 160px; }
+.filter input::placeholder { color: var(--signage-dim); }
+
+.check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; }
+.check input { width: 15px; height: 15px; accent-color: var(--amber); }
+
+/* ---------- Settings ---------- */
+
+.settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px var(--gap);
+  padding: 14px var(--pad) 26px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--signage-dim);
+}
+.field__note { color: var(--signage-dim); font-size: 11.5px; }
+.field--check { justify-content: flex-end; gap: 10px; }
+.field--check label { text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 400; color: var(--signage); }
+
+.settings__foot {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+.field__errors { color: var(--stopped); font-size: 12.5px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--rule);
+  background: var(--board-raised);
+  color: var(--signage);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--signage-dim); }
+.btn--primary { background: var(--amber); border-color: var(--amber); color: #23160a; }
+.btn--primary:hover { background: #ffc255; border-color: #ffc255; }
+.btn--danger { background: var(--stopped); border-color: var(--stopped); color: #2a0d0d; }
+
+/* ---------- Foot + dialog ---------- */
+
+.foot {
+  padding: 18px var(--pad) 30px;
+  color: var(--signage-dim);
+  font-size: 12px;
+}
+
+.confirm {
+  border: 1px solid var(--rule);
+  background: var(--board-raised);
+  color: var(--signage);
+  max-width: 420px;
+  padding: 22px;
+}
+.confirm::backdrop { background: rgb(4 10 20 / 0.72); }
+.confirm h2 { font-size: 19px; }
+.confirm p { margin-top: 10px; color: var(--signage-dim); }
+.confirm__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+/* ---------- Focus ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* ---------- The one authored moment: the plate rolls on state change ---------- */
+
+@keyframes plate-roll {
+  0%   { transform: translateY(-52%) scaleY(0.5); opacity: 0; }
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+.plate__word[data-rolling="true"] {
+  display: inline-block;
+  animation: plate-roll 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+  .board-head { grid-template-columns: 1fr 1fr; }
+  .board-head__code { grid-column: 1 / -1; }
+}
+
+@media (max-width: 620px) {
+  .board-head { grid-template-columns: 1fr; gap: 22px; }
+  .rail__btn { flex: 1 1 auto; min-height: 56px; justify-content: center; }
+  .rail__btn--wide { margin-left: 0; flex-basis: 100%; border-left: 0; border-top: 1px solid var(--rule); }
+  .rows--players li { grid-template-columns: 20px 1fr; }
+  .rows--backups li { grid-template-columns: 1fr auto; }
+  .board__head { flex-direction: column; align-items: flex-start; gap: 10px; }
+}

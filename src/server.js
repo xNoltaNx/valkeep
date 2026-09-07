@@ -190,7 +190,25 @@ const statusTimer = setInterval(async () => {
 }, 5000);
 statusTimer.unref?.();
 
-app.listen(config.panelPort, '0.0.0.0', () => {
+const server = app.listen(config.panelPort, '0.0.0.0', () => {
   console.log(`Valheim control panel: http://localhost:${config.panelPort}`);
   console.log('LAN only - do not expose this port to the internet.');
+});
+
+// A raw EADDRINUSE stack trace is useless to someone who double-clicked
+// start.bat. Say what happened and what to do about it.
+server.on('error', err => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`
+Port ${config.panelPort} is already in use.`);
+    console.error('The panel is probably already running - open');
+    console.error(`  http://localhost:${config.panelPort}`);
+    console.error(`or change "panelPort" in config.json and start again.
+`);
+  } else {
+    console.error(`
+The panel could not start: ${err.message}
+`);
+  }
+  process.exit(1);
 });
