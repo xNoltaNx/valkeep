@@ -165,3 +165,42 @@ test('captures the public address the server reports for itself', () => {
 test('public address is null until the server reports one', () => {
   assert.equal(createParser(patterns).snapshot().publicAddress, null);
 });
+
+// A join code belongs to one server session. Showing the previous session's
+// code is worse than showing none: it is a code you would send to friends that
+// silently does not work.
+
+test('resetSession clears the join code', () => {
+  const p = createParser(patterns);
+  p.feed('Session "S" registered with join code 167812');
+  assert.equal(p.snapshot().joinCode, '167812');
+  p.resetSession();
+  assert.equal(p.snapshot().joinCode, null);
+});
+
+test('resetSession clears players, sockets and the public address', () => {
+  const p = createParser(patterns);
+  p.feed('Got connection SteamID 111');
+  p.feed('Got character ZDOID from Sigrun : 12345:1');
+  p.feed('This is the serverIP used to register the server: 203.0.113.10:2456');
+  p.resetSession();
+  const s = p.snapshot();
+  assert.deepEqual(s.players, []);
+  assert.equal(s.openSockets, 0);
+  assert.equal(s.playerCount, 0);
+  assert.equal(s.publicAddress, null);
+});
+
+test('a new session records its own join code after a reset', () => {
+  const p = createParser(patterns);
+  p.feed('Session "S" registered with join code 111111');
+  p.resetSession();
+  p.feed('Session "S" registered with join code 222222');
+  assert.equal(p.snapshot().joinCode, '222222');
+});
+
+test('resetSession is safe to call on a fresh parser', () => {
+  const p = createParser(patterns);
+  assert.doesNotThrow(() => p.resetSession());
+  assert.equal(p.snapshot().joinCode, null);
+});

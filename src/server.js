@@ -6,7 +6,7 @@
  */
 
 import express from 'express';
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, backupsDir, configFile, logsDir } from './paths.js';
 import { loadConfig, saveConfig, validate, worldsDir } from './settings.js';
@@ -55,6 +55,27 @@ createTail(join(logsDir(), 'server.log'), line => {
   }
 }, { intervalMs: 1000 });
 
+/*
+ * The tailer starts at the end of an existing log, which is right for streaming
+ * but means a panel restarted while the server is up would know nothing about
+ * the session in progress - no join code until the game happened to print one
+ * again. Replaying the log the server has already written recovers it.
+ */
+async function recoverSession() {
+  const status = await proc.status();
+  if (!status.running) return;
+  try {
+    const text = readFileSync(join(logsDir(), 'server.log'), 'utf8');
+    for (const line of text.split(/\r?\n/)) {
+      if (line) roster.apply(parser.feed(line));
+    }
+    const snap = parser.snapshot();
+    if (snap.joinCode) console.log(`Recovered the running session: join code ${snap.joinCode}`);
+  } catch {
+    // No log yet, or unreadable. Streaming will fill in from here.
+  }
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.static(join(ROOT, 'public')));
@@ -63,9 +84,19 @@ const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch
 
 async function currentStatus() {
   const s = await proc.status();
+  const snap = parser.snapshot();
+
+  // A join code, player list and public address describe the server that is
+  // running now. If nothing is running, there is nothing to describe, and a
+  // leftover code is one the host would send to friends in good faith.
+  const session = s.running ? snap : {
+    ...snap, joinCode: null, publicAddress: null,
+    players: [], playerCount: 0, openSockets: 0
+  };
+
   return {
     ...s,
-    ...parser.snapshot(),
+    ...session,
     world: config.server.world,
     serverName: config.server.name,
     crossplay: !!config.server.crossplay,
@@ -131,6 +162,7 @@ app.post('/api/server/start', wrap(async (_req, res) => {
     return res.status(409).json({ error: 'Server is already running.' });
   }
 
+  parser.resetSession();
   const { pid } = await proc.start(config);
   hub.broadcast('progress', { text: 'Starting. First boot on a new world can take a minute.' });
   hub.broadcast('status', await currentStatus());
@@ -143,6 +175,7 @@ app.post('/api/server/stop', wrap(async (_req, res) => {
   }
   await safeBackup('pre-stop');
   const result = await proc.stop({ onProgress: text => hub.broadcast('progress', { text }) });
+  parser.resetSession();
   hub.broadcast('status', await currentStatus());
   res.json(result);
 }));
@@ -150,6 +183,7 @@ app.post('/api/server/stop', wrap(async (_req, res) => {
 app.post('/api/server/restart', wrap(async (_req, res) => {
   await safeBackup('pre-restart');
   await proc.stop({ onProgress: text => hub.broadcast('progress', { text }) });
+  parser.resetSession();
   const { pid } = await proc.start(config);
   hub.broadcast('status', await currentStatus());
   res.json({ pid });
@@ -296,11 +330,18 @@ const diagnosticsTimer = setInterval(async () => {
 }, 4000);
 diagnosticsTimer.unref?.();
 
-// Status heartbeat to the browser.
+// Status heartbeat to the browser. Also notices a server that went away
+// without us: a crash, or someone killing it outside the panel.
+let wasRunning = null;
 const statusTimer = setInterval(async () => {
-  hub.broadcast('status', await currentStatus());
+  const status = await currentStatus();
+  if (wasRunning && !status.running) parser.resetSession();
+  wasRunning = status.running;
+  hub.broadcast('status', status);
 }, 5000);
 statusTimer.unref?.();
+
+recoverSession();
 
 const server = app.listen(config.panelPort, '0.0.0.0', () => {
   console.log(`Valheim control panel: http://localhost:${config.panelPort}`);

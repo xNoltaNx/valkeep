@@ -25,6 +25,12 @@ From another device on the same network, use this PC's LAN address, for example
 5. The **join code** appears in the header once the crossplay session registers.
    Send it to your friends. It changes every restart.
 
+The panel only ever shows a code belonging to the server running right now. Stop
+the server, restart it, or kill it outside the panel, and the code clears
+immediately - a stale code is worse than none, because it is one you would send
+to friends in good faith. If the panel is restarted while a server is up, it
+replays the log to recover the session in progress rather than showing nothing.
+
 ## How friends connect
 
 **With crossplay on you do not need port forwarding.** Valheim registers the

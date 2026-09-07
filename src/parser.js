@@ -125,6 +125,25 @@ export function createParser(patterns) {
     return { count: state.heartbeatCount, source: 'session' };
   }
 
+  /**
+   * Forgets everything that belongs to one server session.
+   *
+   * A join code, a player list and a public address are facts about the server
+   * that is running now. Carrying them past a stop means the panel offers a
+   * code that no longer works - which is worse than offering none, because it
+   * is a code the host would actually send to friends.
+   */
+  function resetSession() {
+    state.names.clear();
+    state.sockets.clear();
+    state.heartbeatCount = null;
+    state.heartbeatSeq = -1;
+    state.socketsSeq = -1;
+    state.joinCode = null;
+    state.publicAddress = null;
+    seq = 0;
+  }
+
   function snapshot() {
     const { count, source } = playerCount();
     return {
@@ -138,5 +157,5 @@ export function createParser(patterns) {
     };
   }
 
-  return { feed, snapshot };
+  return { feed, snapshot, resetSession };
 }
