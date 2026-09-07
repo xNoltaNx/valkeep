@@ -101,6 +101,29 @@
   </div>
 </section>
 
+
+<!-- 4. Players & access -->
+<section class="board" data-biome="plains" data-key="access">
+  <div class="board__head">
+    <h2 class="board__title">
+      <button class="board__toggle" type="button" aria-expanded="true" aria-controls="body-access">
+        <svg class="biome" aria-hidden="true"><use href="#b-plains"></use></svg>
+        <span>Players &amp; access</span>
+        <svg class="chev" aria-hidden="true"><use href="#i-collapse"></use></svg>
+      </button>
+    </h2>
+    <p class="board__meta"><span id="knownCount" class="data">0</span> known</p>
+  </div>
+  <div class="board__body" id="body-access">
+    <p class="notice notice--inline" id="allowListWarning" hidden>
+      <svg class="ico" aria-hidden="true"><use href="#i-warning"></use></svg>
+      <span>The allowed list is not empty, so <b>everyone not on it is blocked</b>.</span>
+    </p>
+    <ol class="rows rows--access" id="accessRows"></ol>
+    <p class="empty" id="accessEmpty">Nobody has joined yet. Players appear here once they connect.</p>
+  </div>
+</section>
+
 <form id="settingsForm">
 
 <!-- 4. World & server -->

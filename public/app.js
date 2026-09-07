@@ -18,6 +18,8 @@ const el = {
   logFilter: $('logFilter'), followLog: $('followLog'),
   dock: $('consoleDock'), dockGrip: $('dockGrip'), dockToggle: $('dockToggle'),
   dockBody: $('consoleBody'),
+  accessRows: $('accessRows'), accessEmpty: $('accessEmpty'),
+  knownCount: $('knownCount'), allowListWarning: $('allowListWarning'),
   connection: $('connection'), connectionText: $('connectionText'),
   worldSelect: $('f-worldSelect'), worldNew: $('f-worldNew'),
   newWorldField: $('newWorldField'), worldNote: $('worldNote'),
@@ -550,6 +552,177 @@ el.settingsForm.addEventListener('submit', async event => {
 });
 
 
+
+/* ---------- players & access ---------- */
+
+let openPlayer = null;
+
+function ago(ms) {
+  const mins = Math.round((Date.now() - ms) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + ' min ago';
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return hours + ' h ago';
+  return Math.round(hours / 24) + ' d ago';
+}
+
+function chip(text, kind) {
+  const span = document.createElement('span');
+  span.className = 'chip chip--' + kind;
+  span.textContent = text;
+  return span;
+}
+
+async function setAccess(id, list, member) {
+  try {
+    await api('/api/players/access', {
+      method: 'POST',
+      body: JSON.stringify({ id, list, member })
+    });
+    await loadPlayers();
+  } catch (err) {
+    notice(err.message);
+  }
+}
+
+async function loadPlayers() {
+  let data;
+  try {
+    data = await api('/api/players');
+  } catch {
+    return;
+  }
+
+  el.knownCount.textContent = data.players.length;
+  el.allowListWarning.hidden = !data.allowListActive;
+  el.accessRows.replaceChildren();
+
+  for (const p of data.players) {
+    const li = document.createElement('li');
+
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'player';
+    row.dataset.online = String(p.online);
+    row.setAttribute('aria-expanded', String(openPlayer === p.id));
+
+    const dot = document.createElement('span');
+    dot.className = 'player__dot';
+
+    const who = document.createElement('span');
+    const name = document.createElement('span');
+    name.className = 'player__who';
+    // The name comes from a heuristic pairing of two log lines, so an unnamed
+    // player is shown as unnamed rather than given a confident guess.
+    name.textContent = p.name ?? 'Unnamed player';
+    const idLine = document.createElement('span');
+    idLine.className = 'player__id';
+    idLine.textContent = p.id;
+    who.append(name, idLine);
+
+    const roles = document.createElement('span');
+    roles.className = 'player__roles';
+    if (p.online) roles.append(chip('Online', 'online'));
+    if (data.lists.admin.includes(p.id)) roles.append(chip('Admin', 'admin'));
+    if (data.lists.banned.includes(p.id)) roles.append(chip('Banned', 'banned'));
+    if (data.lists.permitted.includes(p.id)) roles.append(chip('Allowed', 'permitted'));
+
+    row.append(dot, who, roles);
+    li.append(row);
+
+    if (openPlayer === p.id) li.append(playerPanel(p, data));
+
+    row.addEventListener('click', () => {
+      openPlayer = openPlayer === p.id ? null : p.id;
+      loadPlayers();
+    });
+
+    el.accessRows.append(li);
+  }
+
+  el.accessEmpty.hidden = data.players.length > 0;
+}
+
+function fact(label, value) {
+  const span = document.createElement('span');
+  span.className = 'data';
+  span.textContent = value;
+  const frag = document.createDocumentFragment();
+  frag.append(document.createTextNode(label + ' '), span);
+  return frag;
+}
+
+function playerPanel(p, data) {
+  const panel = document.createElement('div');
+  panel.className = 'player__panel';
+
+  const facts = document.createElement('p');
+  facts.className = 'player__facts';
+  facts.append(fact('First seen', ago(p.firstSeen)));
+  facts.append(document.createTextNode('  |  '));
+  facts.append(fact('last seen', ago(p.lastSeen)));
+  facts.append(document.createTextNode('  |  '));
+  facts.append(fact('sessions', String(p.sessions ?? 1)));
+  panel.append(facts);
+
+  if (p.name && p.nameConfidence === 'inferred') {
+    const caveat = document.createElement('p');
+    caveat.className = 'player__facts';
+    caveat.textContent =
+      'The name is matched to this ID from the order of two separate log lines, '
+      + 'so it can be wrong if two people joined in the same moment.';
+    panel.append(caveat);
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'player__actions';
+
+  for (const [list, spec] of Object.entries(data.definitions)) {
+    const member = data.lists[list].includes(p.id);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = member ? 'btn btn--danger' : 'btn';
+    btn.textContent = (member ? 'Remove ' : 'Make ') + spec.label.toLowerCase();
+    btn.title = spec.help;
+    btn.addEventListener('click', async event => {
+      event.stopPropagation();
+
+      if (list === 'permitted' && !member && data.lists.permitted.length === 0) {
+        const ok = await confirmAction({
+          title: 'Turn on the allowed list?',
+          body: 'Adding the first player to the allowed list blocks everyone who is not on '
+            + 'it. Add your friends before restarting, or nobody else will get in.',
+          ok: 'Turn it on'
+        });
+        if (!ok) return;
+      }
+
+      if (list === 'banned' && !member) {
+        const ok = await confirmAction({
+          title: 'Ban ' + (p.name ?? p.id) + '?',
+          body: 'They will be blocked from joining. Whether someone already connected is '
+            + 'dropped immediately is not something the panel can promise - restart the '
+            + 'server to be certain.',
+          ok: 'Ban player'
+        });
+        if (!ok) return;
+      }
+
+      setAccess(p.id, list, !member);
+    });
+    actions.append(btn);
+  }
+
+  const help = document.createElement('p');
+  help.className = 'player__facts';
+  help.textContent = 'Access changes are written to Valheim list files. Inventory, skills '
+    + 'and position cannot be edited here: Valheim keeps character data on each player own '
+    + 'PC, not on the server.';
+
+  panel.append(actions, help);
+  return panel;
+}
+
 /* ---------- collapsible sections and the console dock ---------- */
 
 /*
@@ -673,6 +846,7 @@ function connect() {
   source.addEventListener('status', e => renderStatus(JSON.parse(e.data)));
   source.addEventListener('log', e => pushLog(JSON.parse(e.data).line));
   source.addEventListener('backups', () => loadBackups());
+  source.addEventListener('players', () => loadPlayers());
 
   source.addEventListener('progress', e => {
     const d = JSON.parse(e.data);
@@ -711,6 +885,7 @@ function connect() {
     logLines.push(...lines.slice(-LOG_MAX));
     renderLog();
     await loadBackups();
+    await loadPlayers();
   } catch (err) {
     notice(`Could not reach the panel: ${err.message}`, { sticky: true });
   }

@@ -18,6 +18,8 @@ import * as backups from './backups.js';
 import { installOrUpdate, isInstalled, readInstalledBuild } from './steamcmd.js';
 import { listWorlds } from './worlds.js';
 import { MODIFIERS, TOGGLES, PRESETS } from './gameplay.js';
+import { LISTS, readAll, setMembership } from './access.js';
+import { createRoster } from './roster.js';
 
 if (!existsSync(configFile())) {
   copyFileSync(join(ROOT, 'config.example.json'), configFile());
@@ -29,6 +31,7 @@ mkdirSync(logsDir(), { recursive: true });
 let config = loadConfig();
 const hub = createHub();
 const parser = createParser(config.logPatterns);
+const roster = createRoster();
 
 // Keep the last slice of log in memory so a browser opening mid-session sees
 // context rather than an empty console.
@@ -41,7 +44,11 @@ createTail(join(logsDir(), 'server.log'), line => {
 
   const events = parser.feed(line);
   hub.broadcast('log', { line });
-  if (events.length) hub.broadcast('events', events);
+  if (events.length) {
+    roster.apply(events);
+    hub.broadcast('events', events);
+    hub.broadcast('players', { changed: true });
+  }
 }, { intervalMs: 1000 });
 
 const app = express();
@@ -139,6 +146,34 @@ app.post('/api/server/restart', wrap(async (_req, res) => {
   hub.broadcast('status', await currentStatus());
   res.json({ pid });
 }));
+
+app.get('/api/players', (_req, res) => {
+  const lists = readAll(config.saveDir);
+  res.json({
+    players: roster.list(),
+    lists,
+    definitions: LISTS,
+    // An allow-list that is not empty silently blocks everyone else, which is
+    // the single most surprising behaviour in this whole feature.
+    allowListActive: lists.permitted.length > 0
+  });
+});
+
+app.post('/api/players/access', wrap(async (req, res) => {
+  const { id, list, member } = req.body ?? {};
+  if (!LISTS[list]) return res.status(400).json({ error: 'Unknown access list.' });
+  try {
+    const result = setMembership(config.saveDir, list, String(id ?? ''), !!member);
+    hub.broadcast('players', { changed: true });
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}));
+
+app.delete('/api/players/:id', (req, res) => {
+  res.json({ forgotten: roster.forget(req.params.id) });
+});
 
 app.get('/api/worlds', (_req, res) => {
   res.json({ worlds: listWorlds(worldsDir(config)), current: config.server.world });
