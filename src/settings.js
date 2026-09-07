@@ -56,3 +56,12 @@ export function buildArgs(cfg) {
 
   return args;
 }
+
+/**
+ * Valheim's -savedir is the base directory; it creates worlds_local inside it.
+ * Backups need the worlds directory itself, so derive it rather than making
+ * the operator configure the same location twice and get it subtly wrong.
+ */
+export function worldsDir(cfg) {
+  return join(cfg.saveDir, 'worlds_local');
+}

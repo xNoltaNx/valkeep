@@ -1,4 +1,4 @@
-import { test, afterEach } from 'node:test';
+import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, readdirSync
@@ -10,16 +10,22 @@ import {
 } from '../src/backups.js';
 import { backupsDir } from '../src/paths.js';
 
-// Backups land in the real data/backups dir (gitignored). Track and remove
-// whatever a test creates so the suite is repeatable.
-const created = [];
-const track = meta => { created.push(meta.id); return meta; };
+// Backups land in the real data/backups dir (gitignored). Snapshot what was
+// there before each test and remove anything new afterwards - restore() also
+// creates its own pre-restore snapshots, so tracking only our own ids leaks.
+const existing = () =>
+  new Set(existsSync(backupsDir()) ? readdirSync(backupsDir()) : []);
+
+let before = existing();
+beforeEach(() => { before = existing(); });
 
 afterEach(() => {
-  while (created.length) {
-    rmSync(join(backupsDir(), created.pop()), { recursive: true, force: true });
+  for (const id of existing()) {
+    if (!before.has(id)) rmSync(join(backupsDir(), id), { recursive: true, force: true });
   }
 });
+
+const track = meta => meta;
 
 // Layout A: the current format, including the sibling files a real server
 // writes - captured from the probe, see docs/shutdown-probe.md.
