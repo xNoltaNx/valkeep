@@ -16,6 +16,8 @@ const el = {
   backupRows: $('backupRows'), backupsEmpty: $('backupsEmpty'), backupCount: $('backupCount'),
   console: $('console'), consoleEmpty: $('consoleEmpty'),
   logFilter: $('logFilter'), followLog: $('followLog'),
+  dock: $('consoleDock'), dockGrip: $('dockGrip'), dockToggle: $('dockToggle'),
+  dockBody: $('consoleBody'),
   connection: $('connection'), connectionText: $('connectionText'),
   worldSelect: $('f-worldSelect'), worldNew: $('f-worldNew'),
   newWorldField: $('newWorldField'), worldNote: $('worldNote'),
@@ -546,6 +548,122 @@ el.settingsForm.addEventListener('submit', async event => {
     el.settingsErrors.textContent = err.message;
   }
 });
+
+
+/* ---------- collapsible sections and the console dock ---------- */
+
+/*
+ * Layout preferences are per-viewer conveniences, so localStorage is the right
+ * home for them - and every access is guarded, because a private window or
+ * blocked site data makes these throw rather than return null.
+ */
+const store = {
+  get(key, fallback) {
+    try {
+      const v = localStorage.getItem(key);
+      return v === null ? fallback : v;
+    } catch { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(key, value); } catch { /* not essential */ }
+  }
+};
+
+const DOCK_MIN = 120;
+
+function setSectionOpen(section, open) {
+  const toggle = section.querySelector('.board__toggle');
+  const body = section.querySelector('.board__body');
+  toggle.setAttribute('aria-expanded', String(open));
+  body.hidden = !open;
+  store.set(`section:${section.dataset.key}`, open ? 'open' : 'closed');
+}
+
+for (const section of document.querySelectorAll('.board[data-key]')) {
+  const toggle = section.querySelector('.board__toggle');
+  setSectionOpen(section, store.get(`section:${section.dataset.key}`, 'open') === 'open');
+  toggle.addEventListener('click', () => {
+    setSectionOpen(section, toggle.getAttribute('aria-expanded') !== 'true');
+  });
+}
+
+function syncDockReserve() {
+  // Measured, not computed: the grip and head heights are CSS's business, and
+  // guessing them is how the footer ended up underneath the dock.
+  const dock = el.dock.getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--dock-reserve', Math.ceil(dock + 24) + 'px');
+}
+
+function applyDockHeight(px) {
+  const max = Math.max(DOCK_MIN, window.innerHeight - 200);
+  const height = Math.round(Math.min(Math.max(px, DOCK_MIN), max));
+  document.documentElement.style.setProperty('--dock-height', height + 'px');
+  store.set('dock:height', String(height));
+  syncDockReserve();
+  return height;
+}
+
+function setDockOpen(open) {
+  el.dock.dataset.collapsed = String(!open);
+  el.dockToggle.setAttribute('aria-expanded', String(open));
+  el.dockBody.hidden = !open;
+  store.set('dock:open', open ? 'yes' : 'no');
+  syncDockReserve();
+  if (open && el.followLog.checked) el.console.scrollTop = el.console.scrollHeight;
+}
+
+applyDockHeight(Number(store.get('dock:height', '260')));
+setDockOpen(store.get('dock:open', 'yes') === 'yes');
+
+el.dockToggle.addEventListener('click', () => {
+  setDockOpen(el.dockToggle.getAttribute('aria-expanded') !== 'true');
+});
+
+// Drag the grip to resize. Pointer events cover mouse, pen, and touch, and
+// capture keeps the drag alive when the cursor outruns the 8px grip.
+let dragFrom = null;
+el.dockGrip.addEventListener('pointerdown', event => {
+  if (el.dock.dataset.collapsed === 'true') return;
+  dragFrom = { y: event.clientY, height: el.dockBody.getBoundingClientRect().height };
+  el.dockGrip.setPointerCapture(event.pointerId);
+  document.body.style.userSelect = 'none';
+});
+el.dockGrip.addEventListener('pointermove', event => {
+  if (!dragFrom) return;
+  applyDockHeight(dragFrom.height + (dragFrom.y - event.clientY));
+});
+const endDrag = () => {
+  if (!dragFrom) return;
+  dragFrom = null;
+  document.body.style.userSelect = '';
+};
+el.dockGrip.addEventListener('pointerup', endDrag);
+el.dockGrip.addEventListener('pointercancel', endDrag);
+
+// The grip is focusable, so it must be operable without a pointer.
+el.dockGrip.addEventListener('keydown', event => {
+  const step = event.shiftKey ? 80 : 24;
+  if (event.key === 'ArrowUp') {
+    applyDockHeight(el.dockBody.getBoundingClientRect().height + step);
+  } else if (event.key === 'ArrowDown') {
+    applyDockHeight(el.dockBody.getBoundingClientRect().height - step);
+  } else {
+    return;
+  }
+  event.preventDefault();
+});
+
+window.addEventListener('resize', () => {
+  if (el.dock.dataset.collapsed !== 'true') {
+    applyDockHeight(el.dockBody.getBoundingClientRect().height);
+  } else {
+    syncDockReserve();
+  }
+});
+
+if (typeof ResizeObserver === 'function') {
+  new ResizeObserver(syncDockReserve).observe(el.dock);
+}
 
 /* ---------- live stream ---------- */
 

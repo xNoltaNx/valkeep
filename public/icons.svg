@@ -64,4 +64,8 @@
     <path d="M12 10v4.5"/>
     <path d="M12 17.25v.5"/>
   </symbol>
+
+  <symbol id="i-collapse" viewBox="0 0 24 24">
+    <path d="M6 15 12 9l6 6"/>
+  </symbol>
 </svg>

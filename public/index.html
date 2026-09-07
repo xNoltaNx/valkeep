@@ -14,6 +14,7 @@
 
 <div id="sprite" aria-hidden="true"></div>
 
+<!-- 1. Current status -->
 <header class="stone-head">
   <svg class="serpent" aria-hidden="true" preserveAspectRatio="none"><use href="#a-serpent"></use></svg>
 
@@ -61,6 +62,7 @@
 
 <div id="notices" role="status" aria-live="polite"></div>
 
+<!-- 2. Main controls -->
 <nav class="rail" aria-label="Server controls">
   <button class="rail__btn" id="btnStart" type="button">
     <svg class="ico" aria-hidden="true"><use href="#i-start"></use></svg><span>Start</span>
@@ -81,34 +83,169 @@
 
 <main>
 
-<section class="board" aria-labelledby="h-players">
+<!-- 3. Connected -->
+<section class="board" data-biome="meadows" data-key="players">
   <div class="board__head">
-    <h2 class="rule-label" id="h-players">
-      <svg class="biome" aria-hidden="true"><use href="#b-meadows"></use></svg>Connected
+    <h2 class="board__title">
+      <button class="board__toggle" type="button" aria-expanded="true" aria-controls="body-players">
+        <svg class="biome" aria-hidden="true"><use href="#b-meadows"></use></svg>
+        <span>Connected</span>
+        <svg class="chev" aria-hidden="true"><use href="#i-collapse"></use></svg>
+      </button>
     </h2>
     <p class="board__meta"><span id="playerCount" class="data">0</span> <span id="playerQual">connected</span></p>
   </div>
-  <ol class="rows rows--players" id="playerRows"></ol>
-  <p class="empty" id="playersEmpty">Nobody is connected.</p>
+  <div class="board__body" id="body-players">
+    <ol class="rows rows--players" id="playerRows"></ol>
+    <p class="empty" id="playersEmpty">Nobody is connected.</p>
+  </div>
 </section>
 
-<section class="board" aria-labelledby="h-backups">
+<form id="settingsForm">
+
+<!-- 4. World & server -->
+<section class="board" data-biome="blackforest" data-key="world">
   <div class="board__head">
-    <h2 class="rule-label" id="h-backups">
-      <svg class="biome" aria-hidden="true"><use href="#b-swamp"></use></svg>Backups
+    <h2 class="board__title">
+      <button class="board__toggle" type="button" aria-expanded="true" aria-controls="body-world">
+        <svg class="biome" aria-hidden="true"><use href="#b-blackforest"></use></svg>
+        <span>World &amp; server</span>
+        <svg class="chev" aria-hidden="true"><use href="#i-collapse"></use></svg>
+      </button>
+    </h2>
+    <p class="board__meta">Applied on next start</p>
+  </div>
+
+  <div class="board__body" id="body-world">
+    <div class="settings">
+      <div class="field">
+        <label for="f-worldSelect">World</label>
+        <select id="f-worldSelect"></select>
+        <p class="field__note" id="worldNote">Loading worlds&hellip;</p>
+      </div>
+
+      <div class="field" id="newWorldField" hidden>
+        <label for="f-worldNew">New world name</label>
+        <input id="f-worldNew" type="text" autocomplete="off" placeholder="Deepnorth">
+        <p class="field__note">Generated on first start. Takes about a minute.</p>
+      </div>
+
+      <div class="field">
+        <label for="f-name">Server name</label>
+        <input id="f-name" type="text" autocomplete="off">
+        <p class="field__note">What friends see in the server browser.</p>
+      </div>
+
+      <div class="field">
+        <label for="f-password">Password</label>
+        <input id="f-password" type="text" autocomplete="off">
+        <p class="field__note">At least 5 characters, and not the same as the server name.</p>
+      </div>
+
+      <div class="field">
+        <label for="f-port">Port</label>
+        <input id="f-port" type="number" inputmode="numeric">
+        <p class="field__note">Valheim also uses the next port up.</p>
+      </div>
+
+      <div class="field">
+        <label for="f-saveinterval">Autosave (seconds)</label>
+        <input id="f-saveinterval" type="number" inputmode="numeric">
+        <p class="field__note">Default 1800, or every 30 minutes.</p>
+      </div>
+
+      <div class="field field--check field--wide">
+        <label class="check">
+          <input type="checkbox" id="f-crossplay">
+          <span>Crossplay &mdash; PC, Xbox, PS5, Switch 2. Friends join by code, with no port forwarding.</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="f-public">
+          <span>List publicly in the server browser</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Gameplay -->
+<section class="board" data-biome="ashlands" data-key="gameplay">
+  <div class="board__head">
+    <h2 class="board__title">
+      <button class="board__toggle" type="button" aria-expanded="true" aria-controls="body-gameplay">
+        <svg class="biome" aria-hidden="true"><use href="#b-ashlands"></use></svg>
+        <span>Gameplay</span>
+        <svg class="chev" aria-hidden="true"><use href="#i-collapse"></use></svg>
+      </button>
+    </h2>
+    <p class="board__meta">World modifiers</p>
+  </div>
+
+  <div class="board__body" id="body-gameplay">
+    <div class="settings">
+      <div class="field">
+        <label for="f-preset">Preset</label>
+        <select id="f-preset"></select>
+      </div>
+
+      <p class="preset-note" id="presetNote"></p>
+
+      <div id="modifierFields" style="display:contents"></div>
+
+      <div class="field field--check field--wide" id="toggleFields"></div>
+
+      <div class="settings__foot">
+        <p class="field__errors" id="settingsErrors" role="alert"></p>
+        <button class="btn btn--primary" type="submit">
+          <svg class="ico" aria-hidden="true"><use href="#i-settings"></use></svg><span>Save settings</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</form>
+
+<!-- 6. Backups -->
+<section class="board" data-biome="swamp" data-key="backups">
+  <div class="board__head">
+    <h2 class="board__title">
+      <button class="board__toggle" type="button" aria-expanded="true" aria-controls="body-backups">
+        <svg class="biome" aria-hidden="true"><use href="#b-swamp"></use></svg>
+        <span>Backups</span>
+        <svg class="chev" aria-hidden="true"><use href="#i-collapse"></use></svg>
+      </button>
     </h2>
     <p class="board__meta"><span id="backupCount" class="data">0</span> kept</p>
   </div>
-  <ol class="rows rows--backups" id="backupRows"></ol>
-  <p class="empty" id="backupsEmpty">No backups yet.</p>
+  <div class="board__body" id="body-backups">
+    <ol class="rows rows--backups" id="backupRows"></ol>
+    <p class="empty" id="backupsEmpty">No backups yet.</p>
+  </div>
 </section>
 
-<section class="board" aria-labelledby="h-console">
-  <div class="board__head">
-    <h2 class="rule-label" id="h-console">
-      <svg class="biome" aria-hidden="true"><use href="#b-mistlands"></use></svg>Console
+</main>
+
+<footer class="foot">
+  <p>LAN only &mdash; no password protects this page. Do not forward this port.</p>
+</footer>
+
+<!-- 7. Console, docked to the bottom of the viewport -->
+<section class="dock" id="consoleDock" data-collapsed="false">
+  <div class="dock__grip" id="dockGrip" role="separator" aria-orientation="horizontal"
+       aria-label="Resize the console. Use the up and down arrow keys." tabindex="0"></div>
+
+  <div class="dock__head">
+    <h2 class="board__title">
+      <button class="board__toggle" type="button" id="dockToggle"
+              aria-expanded="true" aria-controls="consoleBody">
+        <svg class="biome" aria-hidden="true"><use href="#b-mistlands"></use></svg>
+        <span>Console</span>
+        <svg class="chev" aria-hidden="true"><use href="#i-collapse"></use></svg>
+      </button>
     </h2>
-    <div class="board__tools">
+
+    <div class="dock__tools">
       <label class="filter">
         <span class="visually-hidden">Filter log lines</span>
         <input type="search" id="logFilter" placeholder="Filter" autocomplete="off">
@@ -119,106 +256,12 @@
       </label>
     </div>
   </div>
-  <pre class="console" id="console" tabindex="0" aria-label="Server log"></pre>
-  <p class="empty" id="consoleEmpty">Nothing logged yet. The console fills once the server starts.</p>
-</section>
 
-<form id="settingsForm">
-
-<section class="board" aria-labelledby="h-world">
-  <div class="board__head">
-    <h2 class="rule-label" id="h-world">
-      <svg class="biome" aria-hidden="true"><use href="#b-blackforest"></use></svg>World &amp; server
-    </h2>
-    <p class="board__meta">Applied on next start</p>
-  </div>
-
-  <div class="settings">
-    <div class="field">
-      <label for="f-worldSelect">World</label>
-      <select id="f-worldSelect"></select>
-      <p class="field__note" id="worldNote">Loading worlds&hellip;</p>
-    </div>
-
-    <div class="field" id="newWorldField" hidden>
-      <label for="f-worldNew">New world name</label>
-      <input id="f-worldNew" type="text" autocomplete="off" placeholder="Deepnorth">
-      <p class="field__note">Generated on first start. Takes about a minute.</p>
-    </div>
-
-    <div class="field">
-      <label for="f-name">Server name</label>
-      <input id="f-name" type="text" autocomplete="off">
-      <p class="field__note">What friends see in the server browser.</p>
-    </div>
-
-    <div class="field">
-      <label for="f-password">Password</label>
-      <input id="f-password" type="text" autocomplete="off">
-      <p class="field__note">At least 5 characters, and not the same as the server name.</p>
-    </div>
-
-    <div class="field">
-      <label for="f-port">Port</label>
-      <input id="f-port" type="number" inputmode="numeric">
-      <p class="field__note">Valheim also uses the next port up.</p>
-    </div>
-
-    <div class="field">
-      <label for="f-saveinterval">Autosave (seconds)</label>
-      <input id="f-saveinterval" type="number" inputmode="numeric">
-      <p class="field__note">Default 1800, or every 30 minutes.</p>
-    </div>
-
-    <div class="field field--check">
-      <label class="check">
-        <input type="checkbox" id="f-crossplay">
-        <span>Crossplay &mdash; PC, Xbox, PS5, Switch 2. Friends join by code, with no port forwarding.</span>
-      </label>
-      <label class="check">
-        <input type="checkbox" id="f-public">
-        <span>List publicly in the server browser</span>
-      </label>
-    </div>
+  <div class="dock__body" id="consoleBody">
+    <pre class="console" id="console" tabindex="0" aria-label="Server log"></pre>
+    <p class="empty" id="consoleEmpty">Nothing logged yet. The console fills once the server starts.</p>
   </div>
 </section>
-
-<section class="board" aria-labelledby="h-gameplay">
-  <div class="board__head">
-    <h2 class="rule-label" id="h-gameplay">
-      <svg class="biome" aria-hidden="true"><use href="#b-ashlands"></use></svg>Gameplay
-    </h2>
-    <p class="board__meta">World modifiers</p>
-  </div>
-
-  <div class="settings">
-    <div class="field">
-      <label for="f-preset">Preset</label>
-      <select id="f-preset"></select>
-    </div>
-
-    <p class="preset-note" id="presetNote"></p>
-
-    <div id="modifierFields" style="display:contents"></div>
-
-    <div class="field field--check field--wide" id="toggleFields"></div>
-
-    <div class="settings__foot">
-      <p class="field__errors" id="settingsErrors" role="alert"></p>
-      <button class="btn btn--primary" type="submit">
-        <svg class="ico" aria-hidden="true"><use href="#i-settings"></use></svg><span>Save settings</span>
-      </button>
-    </div>
-  </div>
-</section>
-
-</form>
-
-</main>
-
-<footer class="foot">
-  <p>LAN only &mdash; no password protects this page. Do not forward this port.</p>
-</footer>
 
 <dialog class="confirm" id="confirmDialog">
   <form method="dialog">

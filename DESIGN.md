@@ -116,12 +116,41 @@ No emoji, no unicode glyphs, anywhere.
 
 ## Composition
 
-Unchanged from v1, because it works and this is an Operate surface:
+Ordered by how often the host needs each thing, not by how the code is
+organised:
 
 1. **Stone head** — serpent band, service name, status plate, join code.
 2. **Connection** — how friends actually get in, stated plainly.
 3. **Action rail** — one row of carved controls.
-4. **Sections** — Connected, Backups, Console, World & Settings, Gameplay.
+4. **Connected** — who is on.
+5. **World & server**, then **Gameplay** — the settings form.
+6. **Backups**.
+7. **Console** — docked, not in the flow.
+
+### Section bands
+
+One hairline between sections was not enough to parse at a glance. Each section
+now opens with a **raised carved band** — a lintel across the stone — with its
+body recessed below: header light, body dark, one heavy cut between sections.
+
+The band is the disclosure control. Every section collapses, and the state is
+remembered per browser, because a host who never touches Gameplay should be
+able to fold it away permanently.
+
+Each band's biome mark carries that section's colour — Meadows green, a cooler
+forest, swamp gold, Ashlands ember, Mistlands frost. Colour lives in the glyph,
+never in a border, and never as the only signal.
+
+### The console dock
+
+The console is **pinned to the bottom of the viewport** rather than sitting in
+the flow. The log is what you want while something is going wrong, and that is
+exactly the wrong moment to make someone scroll past the settings to find it.
+
+It is collapsible to a single band and resizable by dragging the grip on its
+top edge — with arrow-key support, since the grip is focusable. Height and
+open state persist per browser, and the page reserves measured space beneath
+itself so the dock never covers the footer.
 
 ## Motion
 
