@@ -315,3 +315,53 @@ test('parses the real connection-lost line and clears the count', () => {
   p.feed('09/07/2026 16:42:43: Player connection lost server "Valheim Squad" that has join code 756222, now 0 player(s)');
   assert.equal(p.snapshot().playerCount, 0);
 });
+
+// A real death and respawn, captured 2026-09-07. The death pattern had only
+// ever been reasoned about; these are the lines the game actually printed.
+
+test('a real death is recognised as a death', () => {
+  const p = createParser(patterns);
+  const e = p.feed('09/07/2026 17:05:43: Got character ZDOID from Kettil : 0:0');
+  assert.equal(e[0].type, 'character');
+  assert.equal(e[0].isDeath, true);
+});
+
+test('dying does not remove the player from the list', () => {
+  const p = createParser(patterns);
+  p.feed('09/07/2026 16:58:21: Got character ZDOID from Kettil : -1675501339:4');
+  p.feed('09/07/2026 17:05:43: Got character ZDOID from Kettil : 0:0');
+  assert.deepEqual(p.snapshot().players, ['Kettil'], 'a death is not a disconnect');
+});
+
+test('a respawn reuses the same zdo, so leave detection survives dying', () => {
+  const p = createParser(patterns);
+  p.feed('Got character ZDOID from Kettil : -1675501339:4');
+  p.feed('Got character ZDOID from Kettil : 0:0');
+  p.feed('Got character ZDOID from Kettil : -1675501339:488');
+  // The reap of that same zdo must still be understood as Kettil leaving.
+  const e = p.feed('Destroying abandoned non persistent zdo -1675501339:1 owner -1675501339');
+  assert.equal(e[0].left, true);
+  assert.equal(e[0].name, 'Kettil');
+  assert.deepEqual(p.snapshot().players, []);
+});
+
+test('parses the periodic server statistics line', () => {
+  const p = createParser(patterns);
+  p.feed('09/07/2026 17:03:12:  Connections 1 ZDOS:12487  sent:0 recv:551');
+  const s = p.snapshot().stats;
+  assert.equal(s.connections, 1);
+  assert.equal(s.zdos, 12487);
+  assert.equal(s.sent, 0);
+  assert.equal(s.recv, 551);
+});
+
+test('statistics are null until the server prints them', () => {
+  assert.equal(createParser(patterns).snapshot().stats, null);
+});
+
+test('statistics clear with the session', () => {
+  const p = createParser(patterns);
+  p.feed(' Connections 1 ZDOS:12487  sent:0 recv:551');
+  p.resetSession();
+  assert.equal(p.snapshot().stats, null);
+});

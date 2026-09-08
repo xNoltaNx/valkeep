@@ -37,6 +37,7 @@ export function createParser(patterns) {
     socketsSeq: -1,            // when socket bookkeeping last changed
     joinCode: null,
     publicAddress: null,
+    stats: null,               // the periodic Connections/ZDOS/sent/recv line
     lastSaveAt: null
   };
 
@@ -134,6 +135,23 @@ export function createParser(patterns) {
           }
           break;
         }
+        case 'serverStats': {
+          /*
+           * The server's own periodic statistics. Seen roughly ten minutes
+           * after start; the exact interval is not confirmed, so this is
+           * treated as occasional rather than as a heartbeat. ZDOS is the
+           * count of world objects, which is the closest thing Valheim gives
+           * to "how heavy is this world".
+           */
+          state.stats = {
+            connections: Number(g.connections),
+            zdos: Number(g.zdos),
+            sent: Number(g.sent),
+            recv: Number(g.recv),
+            at: Date.now()
+          };
+          break;
+        }
         case 'publicAddress': {
           if (g.address) state.publicAddress = g.address;
           break;
@@ -194,6 +212,7 @@ export function createParser(patterns) {
     state.socketsSeq = -1;
     state.joinCode = null;
     state.publicAddress = null;
+    state.stats = null;
     seq = 0;
   }
 
@@ -206,6 +225,7 @@ export function createParser(patterns) {
       openSockets: state.sockets.size,
       joinCode: state.joinCode,
       publicAddress: state.publicAddress,
+      stats: state.stats,
       lastSaveAt: state.lastSaveAt
     };
   }

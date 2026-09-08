@@ -31,6 +31,7 @@
     "joinCode": "Session \"(?<session>.*?)\" registered with join code (?<code>\\d+)",
     "worldSaved": "World saved *\\( *(?<ms>[\\d.]+)ms *\\)",
     "publicAddress": "serverIP used to register the server: (?<address>[\\d.]+:\\d+)",
-    "abandonedZdo": "Destroying abandoned non persistent zdo -?\\d+:\\d+ owner (?<owner>-?\\d+)"
+    "abandonedZdo": "Destroying abandoned non persistent zdo -?\\d+:\\d+ owner (?<owner>-?\\d+)",
+    "serverStats": "Connections (?<connections>\\d+) ZDOS:(?<zdos>\\d+)\\s+sent:(?<sent>\\d+) recv:(?<recv>\\d+)"
   }
 }

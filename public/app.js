@@ -20,6 +20,7 @@ const el = {
   dockBody: $('consoleBody'),
   diagStrip: $('diagStrip'), diagCpu: $('diagCpu'),
   diagMem: $('diagMem'), diagThreads: $('diagThreads'),
+  diagZdos: $('diagZdos'), diagZdosWrap: $('diagZdosWrap'),
   accessRows: $('accessRows'), accessEmpty: $('accessEmpty'),
   knownCount: $('knownCount'), allowListWarning: $('allowListWarning'),
   connection: $('connection'), connectionText: $('connectionText'),
@@ -185,6 +186,12 @@ function renderDiagnostics(s) {
     ? (d.memoryMB / 1024).toFixed(2) + ' GB'
     : d.memoryMB + ' MB';
   el.diagThreads.textContent = String(d.threads);
+
+  // The server prints this only occasionally, so it appears once it has and
+  // stays put rather than blinking in and out between readings.
+  const stats = s.stats;
+  el.diagZdosWrap.hidden = !stats;
+  if (stats) el.diagZdos.textContent = stats.zdos.toLocaleString();
 }
 
 function renderConnection(s) {

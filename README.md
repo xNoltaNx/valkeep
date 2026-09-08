@@ -122,14 +122,41 @@ not on the server, which is why your character follows you between servers. Only
 BepInEx mods that relocate characters server-side change this, and they require
 every player to install them.
 
-Whether banning someone **already connected** disconnects them immediately or
-only blocks their next join is not documented and has not been tested here.
-Restart the server if you need to be certain.
+### Tested against a real client on 2026-09-07
+
+**Banning someone already connected drops them within about six seconds.** No
+restart needed. Measured: the id was written at 16:51:58 and the player was gone
+at 16:52:04.
+
+Worth knowing for anyone reading the log: a ban-induced disconnect prints **no
+player-count line at all**, unlike an ordinary quit which logs
+`Player connection lost ... now 0 player(s)`. The only trace is the server
+reaping the player world objects, which is what the panel watches.
+
+**Admin commands need `-console` on the *client*, not just a place on the admin
+list.** Being on `adminlist.txt` is necessary but not sufficient: without
+`-console` in the client Steam launch options, F5 does nothing and it looks
+exactly like the admin grant failed. Add `-console` under
+Steam - Valheim - Properties - Launch Options.
+
+Whether `adminlist.txt` is re-read live or only at startup is still untested -
+the client console was the confounding variable. Granting admin and then
+restarting always works.
 
 ## Diagnostics
 
 While the server runs, the header shows **CPU**, **memory** and **thread count**,
-sampled every four seconds from the operating system.
+sampled every four seconds from the operating system, plus **world objects**
+once the server has reported them.
+
+Measured with a real player connected: **0.3-1% CPU and 1.09 GB**, effectively
+indistinguishable from idle. The ten-player ceiling is nowhere near what this
+costs.
+
+World objects come from a line the server prints only occasionally - about ten
+minutes after start in the one session where it was captured, and the interval
+is not confirmed. It appears once the server has printed it and then stays,
+rather than blinking in and out between readings.
 
 CPU is a rate, not a total: Windows reports cumulative CPU seconds, so the panel
 takes two readings and divides by the elapsed time, normalised across all cores.
