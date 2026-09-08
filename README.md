@@ -1,9 +1,20 @@
-# Valheim Server Board
+# Valkeep
 
 A LAN-only control panel for a Valheim dedicated server running on a home
 Windows PC. Start, stop, monitor, back up, and update the server from a browser.
 
 ![The board](docs/final-desktop.png)
+
+## Getting it
+
+You need **Windows** and **[Node.js](https://nodejs.org) 20 or newer**. You do
+not need Valheim installed, or SteamCMD, or a Steam account with the game -
+the dedicated server is a free download and the panel fetches it for you.
+
+```
+git clone https://github.com/playeraNx/valkeep
+cd valkeep
+```
 
 ## Running it
 
@@ -24,6 +35,13 @@ From another device on the same network, use this PC's LAN address, for example
    the world generates. That is normal.
 5. The **join code** appears in the header once the crossplay session registers.
    Send it to your friends. It changes every restart.
+
+There is nothing to configure before step 2. The server installs into `server/`
+next to the panel, and worlds are read from Valheim's own save location
+(`%USERPROFILE%\AppData\LocalLow\IronGate\Valheim`), so a world you have
+already played single-player shows up in the list. To put either somewhere else
+- a different drive, an existing server install - set `installDir` or `saveDir`
+in `config.json` and restart. Both are left alone once set.
 
 The panel only ever shows a code belonging to the server running right now. Stop
 the server, restart it, or kill it outside the panel, and the code clears
@@ -293,3 +311,7 @@ npm start
 Design documents: `PRODUCT.md` (product truth), `DESIGN.md` (the visual world),
 `docs/superpowers/specs/` (the design spec), `docs/superpowers/plans/` (the
 implementation plan).
+
+## License
+
+MIT. See [LICENSE](LICENSE).

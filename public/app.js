@@ -1,4 +1,4 @@
-/* Valheim Server Board - browser client. */
+/* Valkeep - browser client. */
 
 const $ = id => document.getElementById(id);
 

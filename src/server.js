@@ -349,7 +349,7 @@ statusTimer.unref?.();
 recoverSession();
 
 const server = app.listen(config.panelPort, '0.0.0.0', () => {
-  console.log(`Valheim control panel: http://localhost:${config.panelPort}`);
+  console.log(`Valkeep: http://localhost:${config.panelPort}`);
   console.log('LAN only - do not expose this port to the internet.');
 });
 
