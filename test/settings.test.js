@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildArgs, validate } from '../src/settings.js';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
+import { buildArgs, validate, withDefaultPaths } from '../src/settings.js';
+import { ROOT } from '../src/paths.js';
 
 const base = () => ({
   serverExe: 'C:\\vh\\valheim_server.exe',
@@ -93,4 +96,33 @@ test('rejects a missing server executable path', () => {
 
 test('accepts a valid config', () => {
   assert.deepEqual(validate(base()), []);
+});
+
+// A fresh clone ships config.example.json with the three machine paths empty,
+// and the Settings screen does not expose them. Without defaults, a friend who
+// clones the repo gets a panel that can neither install nor start anything and
+// no way in the interface to say why. Derive them instead of demanding them.
+test('fills the install directory, exe and save directory when unset', () => {
+  const cfg = withDefaultPaths({ installDir: '', serverExe: '', saveDir: '' });
+  assert.equal(cfg.installDir, join(ROOT, 'server'));
+  assert.equal(cfg.serverExe, join(ROOT, 'server', 'valheim_server.exe'));
+  assert.equal(cfg.saveDir, join(homedir(), 'AppData', 'LocalLow', 'IronGate', 'Valheim'));
+});
+
+test('the derived exe follows a custom install directory', () => {
+  const cfg = withDefaultPaths({ installDir: 'D:\vh', serverExe: '', saveDir: '' });
+  assert.equal(cfg.serverExe, join('D:\vh', 'valheim_server.exe'));
+});
+
+test('an operator-set path is never overwritten', () => {
+  const cfg = withDefaultPaths({
+    installDir: 'D:\vh', serverExe: 'D:\vh\other.exe', saveDir: 'E:\saves'
+  });
+  assert.equal(cfg.serverExe, 'D:\vh\other.exe');
+  assert.equal(cfg.saveDir, 'E:\saves');
+});
+
+test('a config with no path keys at all still resolves', () => {
+  const cfg = withDefaultPaths({ server: {} });
+  assert.equal(cfg.installDir, join(ROOT, 'server'));
 });

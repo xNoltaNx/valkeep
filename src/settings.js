@@ -1,10 +1,30 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { configFile, logsDir } from './paths.js';
+import { homedir } from 'node:os';
+import { ROOT, configFile, logsDir } from './paths.js';
 import { activeModifiers, validateGameplay } from './gameplay.js';
 
+/**
+ * The three machine paths are the only settings the panel cannot ask for: they
+ * have to be right before the panel can install anything, and there is nothing
+ * useful to show in Settings until then. So derive them from where the panel
+ * itself lives rather than making a new operator hand-edit config.json to find
+ * out why nothing works. Anything already set is left alone.
+ */
+export function withDefaultPaths(cfg) {
+  const installDir = cfg.installDir || join(ROOT, 'server');
+  return {
+    ...cfg,
+    installDir,
+    serverExe: cfg.serverExe || join(installDir, 'valheim_server.exe'),
+    // Valheim's own default, which is where an existing single-player world
+    // already is - so a world you have played is visible on first run.
+    saveDir: cfg.saveDir || join(homedir(), 'AppData', 'LocalLow', 'IronGate', 'Valheim')
+  };
+}
+
 export function loadConfig() {
-  return JSON.parse(readFileSync(configFile(), 'utf8'));
+  return withDefaultPaths(JSON.parse(readFileSync(configFile(), 'utf8')));
 }
 
 export function saveConfig(cfg) {
