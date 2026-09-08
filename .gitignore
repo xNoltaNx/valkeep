@@ -4,3 +4,4 @@ tools/
 server/
 config.json
 .impeccable/
+.claude/skills/
