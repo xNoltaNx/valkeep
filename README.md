@@ -12,7 +12,7 @@ not need Valheim installed, or SteamCMD, or a Steam account with the game -
 the dedicated server is a free download and the panel fetches it for you.
 
 ```
-git clone https://github.com/playeraNx/valkeep
+git clone https://github.com/xNoltaNx/valkeep
 cd valkeep
 ```
 
