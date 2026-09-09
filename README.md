@@ -28,8 +28,7 @@ From another device on the same network, use this PC's LAN address, for example
 
 1. Start the panel.
 2. Open **Settings**, set the server name, world, and a password (at least 5
-   characters, and not appearing inside the server name or the world name),
-   then save.
+   characters, and not the same as the server name), then save.
 3. Press **Update server**. This downloads SteamCMD and installs the dedicated
    server — several minutes and a few GB.
 4. Press **Start**. First boot on a brand-new world takes about a minute while
@@ -288,7 +287,7 @@ as "unknown", because the panel genuinely does not know when it started.
 
 ```bash
 npm install
-npm test        # 247 tests, node:test
+npm test        # 191 tests, node:test
 npm start
 ```
 

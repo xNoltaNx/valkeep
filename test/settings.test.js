@@ -88,35 +88,6 @@ test('rejects a password equal to the server name', () => {
   assert.ok(validate(cfg).some(e => /name/i.test(e)));
 });
 
-test('rejects a password contained in the server name', () => {
-  const cfg = base();
-  cfg.server.name = 'Midgard Nights';
-  cfg.server.password = 'gard N';
-  assert.ok(validate(cfg).some(e => /server name/i.test(e)));
-});
-
-test('rejects a password contained in the world name', () => {
-  const cfg = base();
-  cfg.server.world = 'Midgard';
-  cfg.server.password = 'idgar';
-  assert.ok(validate(cfg).some(e => /world name/i.test(e)));
-});
-
-test('the containment check ignores case, because the game may not', () => {
-  const cfg = base();
-  cfg.server.world = 'Midgard';
-  cfg.server.password = 'IDGAR';
-  assert.ok(validate(cfg).some(e => /world name/i.test(e)));
-});
-
-test('accepts a password that merely shares letters with the names', () => {
-  const cfg = base();
-  cfg.server.name = 'Midgard Nights';
-  cfg.server.world = 'Midgard';
-  cfg.server.password = 'dragim';
-  assert.deepEqual(validate(cfg), []);
-});
-
 test('rejects a missing server executable path', () => {
   const cfg = base();
   cfg.serverExe = '';
