@@ -41,8 +41,20 @@ export function validate(cfg) {
   if (!s.password || s.password.length < 5) {
     errors.push('Password must be at least 5 characters.');
   }
-  if (s.password && s.name && s.password === s.name) {
-    errors.push('Password must not be the same as the server name.');
+  // Valheim refuses to start if the password appears anywhere inside the
+  // server name or the world name, not merely if it equals one of them - and
+  // it refuses silently, with the process exiting seconds after launch. A
+  // world called Midgard with the password "gard" is the shape that catches
+  // people out. Compared case-insensitively: the game's own comparison may be
+  // stricter than ours, and refusing a setup that would have worked is a
+  // better failure than a server that quietly never comes up.
+  const contains = (haystack, needle) =>
+    String(haystack).toLowerCase().includes(String(needle).toLowerCase());
+  if (s.password && s.name && contains(s.name, s.password)) {
+    errors.push('Password must not appear in the server name.');
+  }
+  if (s.password && s.world && contains(s.world, s.password)) {
+    errors.push('Password must not appear in the world name.');
   }
   errors.push(...validateGameplay(s));
   return errors;
