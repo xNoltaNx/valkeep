@@ -313,7 +313,28 @@ async function act(button, path, body) {
   }
 }
 
-el.btnStart.addEventListener('click', () => act(el.btnStart, '/api/server/start'));
+/*
+ * Start and Restart launch the last saved settings, not what is on screen.
+ * That is easy to forget after choosing a world in the form: the operator
+ * presses Start, the previous world comes up, and friends are handed a
+ * password that the running server does not know.
+ */
+const UNSAVED_WARNING =
+  'The settings form has changes that are not saved. The server uses the last '
+  + 'saved settings, so the world, name, and password on screen will not be the '
+  + 'ones it runs with. Save first if that is not what you want.';
+
+el.btnStart.addEventListener('click', async () => {
+  if (formDirty) {
+    const ok = await confirmAction({
+      title: 'Start with unsaved settings?',
+      body: UNSAVED_WARNING,
+      ok: 'Start anyway'
+    });
+    if (!ok) return;
+  }
+  act(el.btnStart, '/api/server/start');
+});
 
 el.btnStop.addEventListener('click', async () => {
   const ok = await confirmAction({
@@ -326,9 +347,10 @@ el.btnStop.addEventListener('click', async () => {
 
 el.btnRestart.addEventListener('click', async () => {
   const ok = await confirmAction({
-    title: 'Restart the server?',
-    body: 'Everyone is disconnected and the join code changes. A backup is taken first.',
-    ok: 'Restart'
+    title: formDirty ? 'Restart with unsaved settings?' : 'Restart the server?',
+    body: (formDirty ? UNSAVED_WARNING + ' ' : '')
+      + 'Everyone is disconnected and the join code changes. A backup is taken first.',
+    ok: formDirty ? 'Restart anyway' : 'Restart'
   });
   if (ok) act(el.btnRestart, '/api/server/restart');
 });
